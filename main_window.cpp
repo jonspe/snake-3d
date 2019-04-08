@@ -18,46 +18,51 @@
 */
 
 #include "main_window.hh"
+
 #include <QGraphicsRectItem>
 #include <QKeyEvent>
 
 
-MainWindow::MainWindow(QWidget* parent):
-    QMainWindow(parent) {
+MainWindow::MainWindow() {
+    setTitle("Snakey Boi");
 
-    ui_.setupUi(this);
-    ui_.graphicsView->setScene(&scene_);
+    resize(DEFAULT_SIZE);
+    setMinimumSize(MIN_SIZE);
 
-    connect(&timer_, &QTimer::timeout, this, &MainWindow::moveSnake);
+    setSurfaceType(QWindow::OpenGLSurface);
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event) {
-    // TODO: Read the event to see which key got pressed and store the result.
-    // You can remove this function if you don't need it.
+void MainWindow::toggleFullscreen()
+{
+    if (visibility() == Visibility::FullScreen)
+        setVisibility(Visibility::Windowed);
+    else
+        setVisibility(Visibility::FullScreen);
 }
 
-void MainWindow::on_playButton_clicked() {
-    // EXAMPLE: How to create new graphics items in the scene.
-    const QRectF food_rect(0, 0, 1, 1);
-    const QPen pen(Qt::white, 0);
-    const QBrush brush(Qt::black);
-    food_ = scene_.addRect(food_rect, pen, brush);
-    food_->setPos(9, 5);
+void MainWindow::resizeGL(int width, int height)
+{
 
-    adjustSceneArea();
-    timer_.start(1000);
 }
 
-void MainWindow::moveSnake() {
-    // EXAMPLE: How to move a graphics item left in the scene.
-    const QPointF old_food_pos = food_->scenePos();
-    const QPointF new_food_pos = old_food_pos + QPoint(-1, 0);
-    food_->setPos(new_food_pos);
+void MainWindow::paintGL()
+{
+    // Clear previous image
+    glClear(GL_COLOR_BUFFER_BIT);
+
+
 }
 
-void MainWindow::adjustSceneArea() {
-    // TODO: Replace the area's size with the play field's actual size.
-    const QRectF area(0, 0, 10, 10);
-    scene_.setSceneRect(area);
-    ui_.graphicsView->fitInView(area);
+void MainWindow::initializeGL()
+{
+
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+    if (event->isAutoRepeat()) return;
+    qDebug() << event->key();
+
+    if (event->key() == Qt::Key_F11)
+        toggleFullscreen();
 }

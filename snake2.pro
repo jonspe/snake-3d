@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+LIBS     += -lopengl32
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -30,6 +31,3 @@ SOURCES += \
 
 HEADERS += \
         main_window.hh
-
-FORMS += \
-    main_window.ui
