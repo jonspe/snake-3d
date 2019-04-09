@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui opengl
 LIBS     += -lopengl32
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -27,7 +27,13 @@ CONFIG += c++14
 
 SOURCES += \
         main.cpp \
-        main_window.cpp
+    snake.cpp \
+    gameengine.cpp \
+    main_window.cpp
 
 HEADERS += \
-        main_window.hh
+    snake.hh \
+    powerup.hh \
+    gameengine.hh \
+    renderable.hh \
+    main_window.hh

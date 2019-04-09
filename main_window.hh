@@ -20,20 +20,24 @@
 #ifndef PRG2_SNAKE2_MAINWINDOW_HH
 #define PRG2_SNAKE2_MAINWINDOW_HH
 
+
 #include <QOpenGLWindow>
-#include <QGraphicsScene>
-#include <QMainWindow>
-#include <QTimer>
+#include <QOpenGLFunctions>
+
 #include <QDebug>
+#include <QKeyEvent>
 
 #include <random>
+
+#include "gameengine.hh"
+#include "renderable.hh"
 
 
 const QSize DEFAULT_SIZE(1280, 720);
 const QSize MIN_SIZE(640, 480);
 
 
-class MainWindow: public QOpenGLWindow {
+class MainWindow: public QOpenGLWindow, protected QOpenGLFunctions {
     Q_OBJECT
 
 public:
@@ -41,19 +45,19 @@ public:
     ~MainWindow() override = default;
 
     void keyPressEvent(QKeyEvent* event) override;
-
+    void toggleFullscreen();
 protected:
     virtual void initializeGL() override;
     virtual void resizeGL(int width, int height) override;
     virtual void paintGL() override;
 
 private slots:
-    // Maybe not anything here?
+    // Maybe not anything here? Perhaps key events..
 
 private:
-    std::default_random_engine rng_;    /**< Randomizes food locations. */
-    void toggleFullscreen();
-
+    float x;
+    GameEngine engine;
+    QVector<Renderable*> renderables;
 };
 
 
