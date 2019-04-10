@@ -22,22 +22,25 @@
 
 
 #include <QOpenGLWindow>
-#include <QOpenGLFunctions>
+#include <QOpenGLFunctions_2_1>
 
 #include <QDebug>
 #include <QKeyEvent>
+#include <QTimer>
 
 #include <random>
 
-#include "gameengine.hh"
+
 #include "renderable.hh"
+#include "snake.hh"
+#include "powerup.hh"
 
 
 const QSize DEFAULT_SIZE(1280, 720);
 const QSize MIN_SIZE(640, 480);
 
 
-class MainWindow: public QOpenGLWindow, protected QOpenGLFunctions {
+class MainWindow : public QOpenGLWindow {
     Q_OBJECT
 
 public:
@@ -45,19 +48,23 @@ public:
     ~MainWindow() override = default;
 
     void keyPressEvent(QKeyEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
     void toggleFullscreen();
+
+    void gameRender();
 protected:
     virtual void initializeGL() override;
-    virtual void resizeGL(int width, int height) override;
     virtual void paintGL() override;
 
 private slots:
-    // Maybe not anything here? Perhaps key events..
+    void gameUpdate();
 
 private:
-    float x;
-    GameEngine engine;
-    QVector<Renderable*> renderables;
+    QTimer timer_;
+    Snake* snake_;
+    QVector<PowerUp*> powerups_;
+
+    QOpenGLFunctions_2_1* gl;
 };
 
 

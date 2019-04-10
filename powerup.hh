@@ -3,16 +3,16 @@
 
 #include <QVector3D>
 
-// Base class for different powerups
+#include "renderable.hh"
 
-// Food could be considered as a power-up, with small size mo
-class PowerUp
+// Base class for different powerups
+// Food could be considered as a power-up, with small size and speed modifiers
+
+class PowerUp : public Renderable
 {
 public:
     PowerUp();
     virtual ~PowerUp();
-
-    virtual void render();
 };
 
 #endif // POWERUP_HH

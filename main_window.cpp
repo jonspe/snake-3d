@@ -32,7 +32,10 @@ MainWindow::MainWindow() {
     format.setVersion(2, 1);
     setFormat(format);
 
-    x = .0f;
+    // Game init
+    snake_ = new Snake(1.4f, 0.7f, 5.0f);
+
+    connect(&timer_, &QTimer::timeout, this, &MainWindow::gameUpdate);
 }
 
 void MainWindow::toggleFullscreen()
@@ -43,42 +46,54 @@ void MainWindow::toggleFullscreen()
         setVisibility(Visibility::FullScreen);
 }
 
-void MainWindow::resizeGL(int width, int height) {}
+void MainWindow::gameUpdate()
+{
+    float time_delta = 0.016f;
+    snake_->update(time_delta);
+
+    gameRender();
+}
+
+void MainWindow::gameRender()
+{
+    // Clear previous image
+    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Set projection to identity matrix
+    gl->glLoadIdentity();
+
+    // Draw calls here
+    snake_->render(gl);
+
+    // Empty buffers
+    gl->glFlush();
+
+
+    update();
+}
 
 void MainWindow::paintGL()
 {
     // Clear previous image
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set projection to identity matrix
-    glLoadIdentity();
-
-    glRotatef(x, 0.0f, 0.0f, 1.0f);
+    gl->glLoadIdentity();
 
     // Draw calls here
-    glBegin(GL_TRIANGLES);
-
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(.0f, .5f, 0.0f);
-
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(.5f, -.5f, 0.0f);
-
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(-.5f, -.5f, 0.0f);
-
-    glEnd();
+    snake_->render(gl);
 
     // Empty buffers
-    glFlush();
-
-    x += 1.0f;
-    qDebug() << x;
+    gl->glFlush();
 }
 
 // Empty for now
 void MainWindow::initializeGL() {
-    initializeOpenGLFunctions();
+    gl = new QOpenGLFunctions_2_1;
+    gl->initializeOpenGLFunctions();
+
+    timer_.setInterval(15);
+    timer_.start();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
@@ -87,13 +102,35 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     if (event->isAutoRepeat()) return;
     qDebug() << event->key();
 
-
     switch(event->key()) {
     case Qt::Key_F11:
         toggleFullscreen();
         break;
+    case Qt::Key_A:
+        snake_->steer(1);
+        break;
+    case Qt::Key_D:
+        snake_->steer(-1);
+        break;
+
     default:
         break;
     }
+}
 
+void MainWindow::keyReleaseEvent(QKeyEvent* event)
+{
+    if (event->isAutoRepeat()) return;
+
+    switch(event->key()) {
+    case Qt::Key_A:
+        snake_->steer(0);
+        break;
+    case Qt::Key_D:
+        snake_->steer(0);
+        break;
+
+    default:
+        break;
+    }
 }
