@@ -57,26 +57,28 @@ void Snake::steer(int dir)
 
 void Snake::render(QOpenGLFunctions_2_1* gl)
 {
-    gl->glLineWidth(9.0f);
-    gl->glBegin(GL_LINES);
+    gl->glLineWidth(3.0f);
+    gl->glEnable(GL_LINE_SMOOTH);
+    gl->glBegin(GL_LINE_STRIP);
 
-    QVector3D last = position_;
+    gl->glVertex3f(position_.x(), position_.y(), position_.z());
     for (int i = 1; i < tail_.size(); ++i) {
-        QVector3D v1 = last;
-        QVector3D v2 = tail_.at(i);
-        gl->glVertex3f(v1.x(), v1.y(), v1.z());
-        gl->glVertex3f(v2.x(), v2.y(), v2.z());
-        last = v2;
+        QVector3D v = tail_.at(i);
+        gl->glVertex3f(v.x(), v.y(), v.z());
     }
 
     gl->glEnd();
 
-    gl->glPointSize(14.0f);
+    gl->glPointSize(6.0f);
     gl->glBegin(GL_POINTS);
     gl->glVertex3f(position_.x(), position_.y(), position_.z());
     gl->glEnd();
 }
 
+void Snake::setPosition(QVector3D pos)
+{
+    position_ = pos;
+}
 
 void Snake::setLength(float new_length)
 {

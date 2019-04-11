@@ -33,7 +33,7 @@ MainWindow::MainWindow() {
     setFormat(format);
 
     // Game init
-    snake_ = new Snake(1.4f, 0.7f, 5.0f);
+    snake_ = new Snake(3.4f, 0.7f, 8.5f);
 
     connect(&timer_, &QTimer::timeout, this, &MainWindow::gameUpdate);
 }
@@ -49,7 +49,17 @@ void MainWindow::toggleFullscreen()
 void MainWindow::gameUpdate()
 {
     float time_delta = 0.016f;
-    snake_->update(time_delta);
+    QPoint cpos = QCursor::pos();
+    qDebug() << cpos;
+    snake_->setPosition(
+                QVector3D(
+                    float(cpos.x()-500)/float(width())*2.0f-1.0f,
+                    -float(cpos.y()-500)/float(height())*2.0f+1.0f,
+                    0)
+                );
+
+    snake_->update(0);
+
 
     gameRender();
 }
@@ -68,31 +78,16 @@ void MainWindow::gameRender()
     // Empty buffers
     gl->glFlush();
 
-
     update();
 }
 
-void MainWindow::paintGL()
-{
-    // Clear previous image
-    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Set projection to identity matrix
-    gl->glLoadIdentity();
-
-    // Draw calls here
-    snake_->render(gl);
-
-    // Empty buffers
-    gl->glFlush();
-}
-
-// Empty for now
 void MainWindow::initializeGL() {
     gl = new QOpenGLFunctions_2_1;
     gl->initializeOpenGLFunctions();
 
-    timer_.setInterval(15);
+    gl->glEnable(GL_MULTISAMPLE);
+
+    timer_.setInterval(16);
     timer_.start();
 }
 

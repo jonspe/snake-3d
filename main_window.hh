@@ -54,7 +54,6 @@ public:
     void gameRender();
 protected:
     virtual void initializeGL() override;
-    virtual void paintGL() override;
 
 private slots:
     void gameUpdate();
