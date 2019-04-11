@@ -33,7 +33,8 @@ MainWindow::MainWindow() {
     setFormat(format);
 
     // Game init
-    snake_ = new Snake(3.4f, 0.7f, 8.5f);
+    snake_ = new Snake(3.4f, 0.7f, 3.5f);
+    snake_->steer(1);
 
     connect(&timer_, &QTimer::timeout, this, &MainWindow::gameUpdate);
 }
@@ -48,19 +49,11 @@ void MainWindow::toggleFullscreen()
 
 void MainWindow::gameUpdate()
 {
-    float time_delta = 0.016f;
-    QPoint cpos = QCursor::pos();
-    qDebug() << cpos;
-    snake_->setPosition(
-                QVector3D(
-                    float(cpos.x()-500)/float(width())*2.0f-1.0f,
-                    -float(cpos.y()-500)/float(height())*2.0f+1.0f,
-                    0)
-                );
+    qint64 ns = elapsed_timer_.nsecsElapsed();
+    float time_delta = float(ns-prev_ns_) * 1.0f/1000000000.0f;
+    prev_ns_ = ns;
 
-    snake_->update(0);
-
-
+    snake_->update(time_delta);
     gameRender();
 }
 
@@ -68,16 +61,43 @@ void MainWindow::gameRender()
 {
     // Clear previous image
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl->glClearColor(0.5f, 0.75f, 0.95f, 0.0f);
 
     // Set projection to identity matrix
     gl->glLoadIdentity();
 
-    // Draw calls here
+    rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
+    camera_pos = QVector3D(0.0f, 0.0f, -2.1f);
+
+    // Calculate camera matrix
+    QMatrix4x4 mat;
+    float aspect = float(width()) / float(height());
+    mat.perspective(60.0f, aspect, 0.01f, 7.0f);
+    mat.translate(camera_pos);
+    mat.rotate(50.0f, QVector3D(-1.0f, 0.0f, 0.0f));
+    mat.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
+    mat.translate(-snake_->getPosition());
+
+    // Apply camera matrix
+    gl->glMultMatrixf(mat.constData());
+
+    // Draw play area
+    gl->glColor3f(0.4f, 1.0f, 0.25f);
+    gl->glBegin(GL_QUADS);
+    gl->glVertex3f(-1.0f, 1.0f, -0.02f);
+    gl->glVertex3f(1.0f, 1.0f, -0.02f);
+    gl->glVertex3f(1.0f, -1.0f, -0.02f);
+    gl->glVertex3f(-1.0f, -1.0f, -0.02f);
+    gl->glEnd();
+
+    // Draw snake
+    gl->glColor3f(0.0f, 0.3f, 0.1f);
     snake_->render(gl);
 
     // Empty buffers
     gl->glFlush();
 
+    // Update the window to show rendered result
     update();
 }
 
@@ -86,9 +106,15 @@ void MainWindow::initializeGL() {
     gl->initializeOpenGLFunctions();
 
     gl->glEnable(GL_MULTISAMPLE);
+    gl->glEnable(GL_DEPTH_TEST);
+
+    camera_pos = QVector3D(0.0f, 0.0f, -2.1f);
 
     timer_.setInterval(16);
     timer_.start();
+
+    prev_ns_ = 0;
+    elapsed_timer_.start();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
@@ -115,6 +141,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
+    // Ignore repeated keys
     if (event->isAutoRepeat()) return;
 
     switch(event->key()) {

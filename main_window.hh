@@ -23,13 +23,14 @@
 
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions_2_1>
+#include <QMatrix4x4>
 
 #include <QDebug>
 #include <QKeyEvent>
 #include <QTimer>
+#include <QElapsedTimer>
 
 #include <random>
-
 
 #include "renderable.hh"
 #include "snake.hh"
@@ -59,11 +60,22 @@ private slots:
     void gameUpdate();
 
 private:
+    // Timers
     QTimer timer_;
+    QElapsedTimer elapsed_timer_;
+    qint64 prev_ns_;
+
+    // Gameplay
     Snake* snake_;
     QVector<PowerUp*> powerups_;
 
+    // OpenGL rendering, matrices
+    QVector3D camera_pos;
+    QMatrix4x4 perspective_mat;
+
     QOpenGLFunctions_2_1* gl;
+
+    float rot = 0.0f;
 };
 
 

@@ -8,7 +8,7 @@
 #include "renderable.hh"
 #include "powerup.hh"
 
-const float SNAKE_SEGMENT_DIST = 0.05f;
+const float SNAKE_SEGMENT_DIST = 0.02f;
 
 class Snake : public Renderable
 {
@@ -20,6 +20,10 @@ public:
 
     void update(float time_delta);
     void steer(int dir);
+
+    QVector3D getDirection();
+    QVector3D getPosition();
+    float getHeading();
 
     void setLength(float new_length);
     void setPosition(QVector3D pos);
