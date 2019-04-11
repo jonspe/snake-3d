@@ -1,21 +1,16 @@
-/*
-####################################################################
-# TIE-02201 Ohjelmointi 2: Perusteet, K2019                        #
-# TIE-02207 Programming 2: Basics, S2019                           #
-#                                                                  #
-# Project4: Snake: The Revengeance                                 #
-# Program description: "While revenge is served cold and vengeance #
-#                       is served hot revengeance is often seen    #
-#                       served with Cajun with a side of onion     #
-#                       rings and often dumplings in the Orient."  #
-#                       - urbandictionary                          #
-#                                                                  #
-# File: main.cpp                                                   #
-# Description: Starts executing the program.                       #
-#                                                                  #
-# Author: First Last, student#, first.last@tuni.fi                 #
-####################################################################
+/**
+  TIE-02201 Ohjelmointi 2: Perusteet, K2019
+  Assignment 12.4: Matopelin paluu
+    3D Snake game made with OpenGL 2.1 immediate mode.
+    See 'instructions.txt' for further information.
+
+  main.cpp
+    Main file.
+
+  @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
+
+
 
 #include "main_window.hh"
 #include <QApplication>
