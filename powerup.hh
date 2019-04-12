@@ -17,12 +17,12 @@
 
 #include <QVector3D>
 
-#include "renderable.hh"
+#include "gameobject.hh"
 
 // Base class for different powerups
 // Food could be considered as a power-up, with small size and speed modifiers
 
-class PowerUp : public Renderable
+class PowerUp : public GameObject
 {
 public:
     PowerUp();

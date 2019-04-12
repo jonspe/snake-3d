@@ -27,10 +27,12 @@ CONFIG += c++14
 SOURCES += \
         main.cpp \
     snake.cpp \
-    main_window.cpp
+    main_window.cpp \
+    gameobject.cpp
 
 HEADERS += \
     snake.hh \
     powerup.hh \
     renderable.hh \
-    main_window.hh
+    main_window.hh \
+    gameobject.hh

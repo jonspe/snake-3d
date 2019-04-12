@@ -16,12 +16,19 @@
 #define RENDERABLE_HH
 
 #include <QOpenGLFunctions_2_1>
-#include <QVector3D>
 
 class Renderable
 {
 public:
     virtual ~Renderable() {}
+
+    // Init object by for example, generating a VBO
+    virtual void initRender(QOpenGLFunctions_2_1* gl) = 0;
+
+    // Do CPU related vertex data tasks before passing to GPU
+    virtual void setupRender(QOpenGLFunctions_2_1* gl) = 0;
+
+    // Render the object on the GPU
     virtual void render(QOpenGLFunctions_2_1* gl) = 0;
 };
 
