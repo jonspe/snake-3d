@@ -22,7 +22,12 @@
 #include "powerup.hh"
 #include "gameobject.hh"
 
+const float SNAKE_HEAD_LENGTH = 0.06f;
+const float SNAKE_TAIL_END_LENGTH = 0.06f;
 const float SNAKE_SEGMENT_DIST = 0.02f;
+
+const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
+
 
 class Snake : public GameObject
 {
@@ -31,14 +36,12 @@ public:
     ~Snake() override;
 
     void steer(int dir);
-    void setLength(float newLength);
-    void applyPowerUp(PowerUp& powerUp);
 
     void render(QOpenGLFunctions_2_1* gl) override;
     void setupRender(QOpenGLFunctions_2_1* gl) override;
     void initRender(QOpenGLFunctions_2_1* gl) override;
 
-    void update(float time_delta) override;
+    void update(float timeDelta) override;
 private:
     float moveSpeed_;
     float steerSpeed_;
