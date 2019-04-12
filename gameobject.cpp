@@ -66,6 +66,9 @@ void GameObject::setDirection(QVector3D direction)
 
 void GameObject::setSpeed(float speed)
 {
+    if (velocity_.lengthSquared() < 0.01f)
+        velocity_ = QVector3D(1, 0, 0);
+
     velocity_ = velocity_.normalized() * speed;
 }
 
