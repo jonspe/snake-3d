@@ -56,17 +56,15 @@ private slots:
 private:
     // Timers
     QTimer timer_;
-    QElapsedTimer elapsed_timer_;
-    qint64 prev_ns_;
+    QElapsedTimer elapsedTimer_;
+    qint64 prevNs_;
 
     // Gameplay
     Snake* snake_;
-    QVector<PowerUp*> powerups_;
+    QVector<PowerUp*> powerUps_;
 
-    // OpenGL rendering, matrices
-    QVector3D camera_pos;
-    QMatrix4x4 perspective_mat;
-
+    // Rendering
+    QVector3D cameraPos;
     QOpenGLFunctions_2_1* gl;
 
     float rot = 0.0f;

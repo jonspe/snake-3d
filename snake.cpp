@@ -19,8 +19,8 @@
 #define PI_F 3.141592653f
 
 
-Snake::Snake(float length, float speed, float steer_speed): GameObject (),
-    move_speed_(speed), steer_speed_(steer_speed), steer_dir_(0)
+Snake::Snake(float length, float speed, float steerSpeed): GameObject (),
+    moveSpeed_(speed), steerSpeed_(steerSpeed), steerDir_(0)
 {
     int segments = int(length/SNAKE_SEGMENT_DIST);
     for (int i = 0; i < segments; ++i)
@@ -32,31 +32,31 @@ Snake::Snake(float length, float speed, float steer_speed): GameObject (),
 Snake::~Snake() {}
 
 
-void Snake::update(float time_delta)
+void Snake::update(float timeDelta)
 {
     // Multiply by move_speed_ to ensure same turning radius across speeds
-    float headingIncrement = steer_dir_ * steer_speed_ * move_speed_ * time_delta;
+    float headingIncrement = steerDir_ * steerSpeed_ * moveSpeed_ * timeDelta;
 
-    setSpeed(move_speed_);
+    setSpeed(moveSpeed_);
     setHeading(getHeading() + headingIncrement);
-    position_ += velocity_ * time_delta;
+    position_ += velocity_ * timeDelta;
 
     // Calculate tail positions so that each is a set distance apart
     // Gives a really cool effect, like rope at 1.0 friction with ground
-    QVector3D prev_pos = position_;
+    QVector3D prevPos = position_;
     for (int i = 1; i < tail_.size(); ++i)
     {
         QVector3D v = tail_.at(i);
-        QVector3D n = (v-prev_pos).normalized();
-        tail_.replace(i, prev_pos + n*SNAKE_SEGMENT_DIST);
+        QVector3D n = (v - prevPos).normalized();
+        tail_.replace(i, prevPos + n*SNAKE_SEGMENT_DIST);
 
-        prev_pos = tail_.at(i);
+        prevPos = tail_.at(i);
     }
 }
 
 void Snake::steer(int dir)
 {
-    steer_dir_ = dir;
+    steerDir_ = dir;
 }
 
 
@@ -93,5 +93,5 @@ void Snake::render(QOpenGLFunctions_2_1* gl)
     gl->glEnd();
 }
 
-void Snake::setLength(float new_length) {}
-void Snake::applyPowerUp(PowerUp& power_up) {}
+void Snake::setLength(float newLength) {}
+void Snake::applyPowerUp(PowerUp& powerUp) {}

@@ -43,11 +43,11 @@ void MainWindow::toggleFullscreen()
 
 void MainWindow::gameUpdate()
 {
-    qint64 ns = elapsed_timer_.nsecsElapsed();
-    float time_delta = float(ns-prev_ns_) * 1.0f/1000000000.0f;
-    prev_ns_ = ns;
+    qint64 ns = elapsedTimer_.nsecsElapsed();
+    float timeDelta = float(ns-prevNs_) * 1.0f/1000000000.0f;
+    prevNs_ = ns;
 
-    snake_->update(time_delta);
+    snake_->update(timeDelta);
     gameRender();
 }
 
@@ -61,13 +61,13 @@ void MainWindow::gameRender()
     gl->glLoadIdentity();
 
     rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
-    camera_pos = QVector3D(0.0f, 0.0f, -2.1f);
+    cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
 
     // Calculate camera matrix
     QMatrix4x4 mat;
     float aspect = float(width()) / float(height());
     mat.perspective(60.0f, aspect, 0.01f, 7.0f);
-    mat.translate(camera_pos);
+    mat.translate(cameraPos);
     mat.rotate(50.0f, QVector3D(-1.0f, 0.0f, 0.0f));
     mat.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
     mat.translate(-snake_->getPosition());
@@ -102,13 +102,13 @@ void MainWindow::initializeGL() {
     gl->glEnable(GL_MULTISAMPLE);
     gl->glEnable(GL_DEPTH_TEST);
 
-    camera_pos = QVector3D(0.0f, 0.0f, -2.1f);
+    cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
 
     timer_.setInterval(16);
     timer_.start();
 
-    prev_ns_ = 0;
-    elapsed_timer_.start();
+    prevNs_ = 0;
+    elapsedTimer_.start();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)

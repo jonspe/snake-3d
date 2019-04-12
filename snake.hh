@@ -27,12 +27,12 @@ const float SNAKE_SEGMENT_DIST = 0.02f;
 class Snake : public GameObject
 {
 public:
-    Snake(float length, float speed, float steer_speed);
+    Snake(float length, float speed, float steerSpeed);
     ~Snake() override;
 
     void steer(int dir);
-    void setLength(float new_length);
-    void applyPowerUp(PowerUp& power_up);
+    void setLength(float newLength);
+    void applyPowerUp(PowerUp& powerUp);
 
     void render(QOpenGLFunctions_2_1* gl) override;
     void setupRender(QOpenGLFunctions_2_1* gl) override;
@@ -40,9 +40,9 @@ public:
 
     void update(float time_delta) override;
 private:
-    float move_speed_;
-    float steer_speed_;
-    float steer_dir_;
+    float moveSpeed_;
+    float steerSpeed_;
+    float steerDir_;
 
     QVector<QVector3D> tail_;
 
