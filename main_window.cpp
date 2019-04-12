@@ -55,37 +55,21 @@ void MainWindow::gameRender()
 {
     // Clear previous image
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    gl->glClearColor(0.5f, 0.75f, 0.95f, 0.0f);
 
-    // Set projection to identity matrix
-    gl->glLoadIdentity();
+//    rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
+//    cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
 
-    rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
-    cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
+//    // Calculate camera matrix
 
-    // Calculate camera matrix
-    QMatrix4x4 mat;
-    float aspect = float(width()) / float(height());
-    mat.perspective(60.0f, aspect, 0.01f, 7.0f);
-    mat.translate(cameraPos);
-    mat.rotate(50.0f, QVector3D(-1.0f, 0.0f, 0.0f));
-    mat.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
-    mat.translate(-snake_->getPosition());
+//    QMatrix4x4 mat;
+//    float aspect = float(width()) / float(height());
+//    mat.perspective(60.0f, aspect, 0.01f, 7.0f);
+//    mat.translate(cameraPos);
+//    mat.rotate(50.0f, QVector3D(-1.0f, 0.0f, 0.0f));
+//    mat.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
+//    mat.translate(-snake_->getPosition());
 
-    // Apply camera matrix
-    gl->glMultMatrixf(mat.constData());
 
-    // Draw play area
-    gl->glColor3f(0.4f, 1.0f, 0.25f);
-    gl->glBegin(GL_QUADS);
-    gl->glVertex3f(-1.0f, 1.0f, -0.02f);
-    gl->glVertex3f(1.0f, 1.0f, -0.02f);
-    gl->glVertex3f(1.0f, -1.0f, -0.02f);
-    gl->glVertex3f(-1.0f, -1.0f, -0.02f);
-    gl->glEnd();
-
-    // Draw snake
-    gl->glColor3f(0.0f, 0.3f, 0.1f);
     snake_->render(gl);
 
     // Empty buffers
@@ -96,11 +80,10 @@ void MainWindow::gameRender()
 }
 
 void MainWindow::initializeGL() {
-    gl = new QOpenGLFunctions_2_1;
+    gl = new QOpenGLFunctions;
     gl->initializeOpenGLFunctions();
 
-    gl->glEnable(GL_MULTISAMPLE);
-    gl->glEnable(GL_DEPTH_TEST);
+    snake_->initShader(gl);
 
     cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
 

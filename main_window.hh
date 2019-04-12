@@ -16,7 +16,7 @@
 
 
 #include <QOpenGLWindow>
-#include <QOpenGLFunctions_2_1>
+#include <QOpenGLFunctions>
 #include <QMatrix4x4>
 
 #include <QDebug>
@@ -35,7 +35,7 @@ const QSize DEFAULT_SIZE(1280, 720);
 const QSize MIN_SIZE(640, 480);
 
 
-class MainWindow : public QOpenGLWindow {
+class MainWindow : public QOpenGLWindow, protected QOpenGLFunctions {
     Q_OBJECT
 
 public:
@@ -65,7 +65,7 @@ private:
 
     // Rendering
     QVector3D cameraPos;
-    QOpenGLFunctions_2_1* gl;
+    QOpenGLFunctions* gl;
 
     float rot = 0.0f;
 };

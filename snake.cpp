@@ -31,7 +31,6 @@ Snake::Snake(float length, float speed, float steerSpeed): GameObject (),
 
 Snake::~Snake() {}
 
-
 void Snake::update(float timeDelta)
 {
     // Multiply by move_speed_ to ensure same turning radius across speeds
@@ -44,7 +43,7 @@ void Snake::update(float timeDelta)
     // Calculate tail positions so that each is a set distance apart
     // Gives a really cool effect, like rope at 1.0 friction with ground
     QVector3D prevPos = position_;
-    for (int i = 1; i < tail_.size(); ++i)
+    for (int i = 0; i < tail_.size(); ++i)
     {
         QVector3D v = tail_.at(i);
         QVector3D n = (v - prevPos).normalized();
@@ -60,38 +59,69 @@ void Snake::steer(int dir)
 }
 
 
-void Snake::initRender(QOpenGLFunctions_2_1 *gl) {}
-void Snake::setupRender(QOpenGLFunctions_2_1 *gl) {}
-
-void Snake::render(QOpenGLFunctions_2_1* gl)
+void Snake::initShader(QOpenGLFunctions *gl)
 {
-    gl->glBegin(GL_QUAD_STRIP);
+    // Initialize Vertex Buffer Object
+    gl->glGenBuffers(1, &vbo_);
+    gl->glBindBuffer(GL_ARRAY_BUFFER, vbo_);
 
-    int s = tail_.size();
+    // Allocate 10000 bytes for snake vertices
+    gl->glBufferData(GL_ARRAY_BUFFER, 10000, nullptr, GL_STREAM_DRAW);
+    gl->glEnableVertexAttribArray(0);
+    gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);
 
-    // Calculate tail vertices
-    for (int i = 2; i < s; ++i) {
-        QVector3D v0 = tail_.at(i-1);
-        QVector3D v1 = tail_.at(i);
+    // Define vertex and fragment shaders
+    program_.addShaderFromSourceCode(QOpenGLShader::Vertex,
+        "attribute highp vec4 vertex;\n"
+        "void main(void)\n"
+        "{\n"
+        "   gl_Position = matrix * vertex;\n"
+        "}");
+    program_.addShaderFromSourceCode(QOpenGLShader::Fragment,
+        "uniform mediump vec4 color;\n"
+        "void main(void)\n"
+        "{\n"
+        "   gl_FragColor = vec4(0.0f, 1.0f, 1.0f, 1.0f);\n"
+        "}");
 
-        QVector3D a = (v1-v0).normalized() * 0.03f;
-
-        gl->glVertex3f(v0.x() - a.y(), v0.y() + a.x(), v0.z());
-        gl->glVertex3f(v0.x() + a.y(), v0.y() - a.x(), v0.z());
-    }
-
-    // Thinking of VBO (Vertex Buffer Object) implementation
-    /*
-    gl->glEnableClientState(GL_VERTEX_ARRAY);
-    gl->glEnableClientState(GL_COLOR_ARRAY);
-    gl->glVertexPointer(3, GL_FLOAT, 6*sizeof(float), data);
-    gl->glColorPointer(3, GL_FLOAT, 6*sizeof(float), data);
-
-    gl->glDrawElements(GL_TRIANGLES, num_vertices);
-    */
-
-    gl->glEnd();
+    // Link shader program to OpenGL
+    program_.link();
 }
 
-void Snake::setLength(float newLength) {}
-void Snake::applyPowerUp(PowerUp& powerUp) {}
+void Snake::render(QOpenGLFunctions* gl)
+{
+    gl->glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+
+    QVector<GLuint> indices;
+
+    for (int i = 0; i < tail_.size()-1; ++i) {
+        float data[6];
+
+        QVector3D v0 = tail_.at(i);
+        QVector3D v1 = tail_.at(i+1);
+
+        // Give snake width
+        QVector3D a = (v1-v0).normalized() * 0.03f;
+
+        data[0] = v0.x() - a.y();
+        data[1] = v0.y() + a.x();
+        data[2] = v0.z();
+
+        data[3] = v0.x() + a.y();
+        data[4] = v0.y() - a.x();
+        data[5] = v0.z();
+
+        // Store vertex indices for OpenGL
+        indices.push_back( GLuint(i*2) );
+        indices.push_back( GLuint(i*2 + 1));
+
+        // Update mesh vertex data at offset
+        GLintptr offset = sizeof(data) * GLuint(i);
+        gl->glBufferSubData(GL_ARRAY_BUFFER, offset, sizeof(data), &data);
+    }
+
+    // Apply shader and finally draw snake
+    program_.bind();
+    gl->glDrawElements(GL_QUAD_STRIP, indices.count(),
+                       GL_UNSIGNED_INT, indices.data());
+}

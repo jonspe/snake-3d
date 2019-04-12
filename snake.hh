@@ -16,7 +16,7 @@
 
 #include <QVector>
 #include <QVector3D>
-#include <QOpenGLFunctions_2_1>
+#include <QOpenGLFunctions>
 
 #include "renderable.hh"
 #include "powerup.hh"
@@ -24,7 +24,7 @@
 
 const float SNAKE_HEAD_LENGTH = 0.06f;
 const float SNAKE_TAIL_END_LENGTH = 0.06f;
-const float SNAKE_SEGMENT_DIST = 0.02f;
+const float SNAKE_SEGMENT_DIST = 0.05f;
 
 const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
 
@@ -37,9 +37,8 @@ public:
 
     void steer(int dir);
 
-    void render(QOpenGLFunctions_2_1* gl) override;
-    void setupRender(QOpenGLFunctions_2_1* gl) override;
-    void initRender(QOpenGLFunctions_2_1* gl) override;
+    void render(QOpenGLFunctions *gl) override;
+    void initShader(QOpenGLFunctions* gl) override;
 
     void update(float timeDelta) override;
 private:
@@ -49,7 +48,8 @@ private:
 
     QVector<QVector3D> tail_;
 
-    GLintptr vbo_;
+    GLuint vbo_;
+    QOpenGLShaderProgram program_;
 };
 
 #endif // SNAKE_HH
