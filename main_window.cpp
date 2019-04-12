@@ -27,7 +27,7 @@ MainWindow::MainWindow() {
     setFormat(format);
 
     // Game init
-    snake_ = new Snake(3.4f, 0.7f, 3.5f);
+    snake_ = new Snake(3.4f, 0.7f, 4.0f);
     snake_->steer(1);
 
     connect(&timer_, &QTimer::timeout, this, &MainWindow::gameUpdate);
