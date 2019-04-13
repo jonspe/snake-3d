@@ -37,8 +37,8 @@ public:
 
     void steer(int dir);
 
-    void render(QOpenGLFunctions *gl) override;
-    void initShader(QOpenGLFunctions* gl) override;
+    void initRendering(QOpenGLFunctions* gl) override;
+    void render(QOpenGLFunctions *gl, QMatrix4x4 &viewMatrix) override;
 
     void update(float timeDelta) override;
 private:
@@ -48,8 +48,8 @@ private:
 
     QVector<QVector3D> tail_;
 
+    QOpenGLShaderProgram shaderProgram_;
     GLuint vbo_;
-    QOpenGLShaderProgram program_;
 };
 
 #endif // SNAKE_HH

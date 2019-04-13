@@ -28,11 +28,13 @@ SOURCES += \
         main.cpp \
     snake.cpp \
     main_window.cpp \
-    gameobject.cpp
+    gameobject.cpp \
+    camera.cpp
 
 HEADERS += \
     snake.hh \
     powerup.hh \
     renderable.hh \
     main_window.hh \
-    gameobject.hh
+    gameobject.hh \
+    camera.hh

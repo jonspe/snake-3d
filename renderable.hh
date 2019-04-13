@@ -24,11 +24,11 @@ class Renderable
 public:
     virtual ~Renderable() {}
 
-    // Create shader and VBO
-    virtual void initShader(QOpenGLFunctions* gl) = 0;
+    // Create VBO, allocate memory etc.
+    virtual void initRendering(QOpenGLFunctions* gl) = 0;
 
     // Render the object on the GPU
-    virtual void render(QOpenGLFunctions* gl) = 0;
+    virtual void render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix) = 0;
 };
 
 #endif // RENDERABLE_HH

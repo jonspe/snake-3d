@@ -20,12 +20,6 @@ MainWindow::MainWindow() {
     resize(DEFAULT_SIZE);
     setMinimumSize(MIN_SIZE);
 
-    // Set OpenGL compatibility
-    QSurfaceFormat format;
-    format.setProfile(QSurfaceFormat::CompatibilityProfile);
-    format.setVersion(2, 1);
-    setFormat(format);
-
     // Game init
     snake_ = new Snake(3.4f, 0.7f, 4.0f);
     snake_->steer(1);
@@ -56,21 +50,20 @@ void MainWindow::gameRender()
     // Clear previous image
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//    rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
-//    cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
+    rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
+    cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
 
-//    // Calculate camera matrix
+    // Calculate camera matrix
 
-//    QMatrix4x4 mat;
-//    float aspect = float(width()) / float(height());
-//    mat.perspective(60.0f, aspect, 0.01f, 7.0f);
-//    mat.translate(cameraPos);
-//    mat.rotate(50.0f, QVector3D(-1.0f, 0.0f, 0.0f));
-//    mat.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
-//    mat.translate(-snake_->getPosition());
+    QMatrix4x4 mat;
+    float aspect = float(width()) / float(height());
+    mat.perspective(60.0f, aspect, 0.2f, 5.0f);
+    mat.translate(cameraPos);
+    mat.rotate(50.0f, QVector3D(-1.0f, 0.0f, 0.0f));
+    mat.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
+    mat.translate(-snake_->getPosition());
 
-
-    snake_->render(gl);
+    snake_->render(gl, mat);
 
     // Empty buffers
     gl->glFlush();
@@ -83,7 +76,12 @@ void MainWindow::initializeGL() {
     gl = new QOpenGLFunctions;
     gl->initializeOpenGLFunctions();
 
-    snake_->initShader(gl);
+    gl->glEnable(GL_CULL_FACE);
+    gl->glEnable(GL_DEPTH_TEST);
+    gl->glDepthMask(GL_TRUE);
+    gl->glDepthFunc(GL_LESS);
+
+    snake_->initRendering(gl);
 
     cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
 
