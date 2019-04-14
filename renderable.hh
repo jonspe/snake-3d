@@ -25,7 +25,7 @@ public:
     virtual ~Renderable() {}
 
     // Create VBO, allocate memory etc.
-    virtual void initRendering(QOpenGLFunctions* gl) = 0;
+    virtual void initShaders() = 0;
 
     // Render the object on the GPU
     virtual void render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix) = 0;

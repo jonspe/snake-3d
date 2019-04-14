@@ -24,7 +24,7 @@
 
 const float SNAKE_HEAD_LENGTH = 0.06f;
 const float SNAKE_TAIL_END_LENGTH = 0.06f;
-const float SNAKE_SEGMENT_DIST = 0.05f;
+const float SNAKE_SEGMENT_DIST = 0.035f;
 
 const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
 
@@ -37,7 +37,7 @@ public:
 
     void steer(int dir);
 
-    void initRendering(QOpenGLFunctions* gl) override;
+    void initShaders() override;
     void render(QOpenGLFunctions *gl, QMatrix4x4 &viewMatrix) override;
 
     void update(float timeDelta) override;
@@ -49,7 +49,6 @@ private:
     QVector<QVector3D> tail_;
 
     QOpenGLShaderProgram shaderProgram_;
-    GLuint vbo_;
 };
 
 #endif // SNAKE_HH

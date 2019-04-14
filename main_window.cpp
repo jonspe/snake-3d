@@ -51,15 +51,15 @@ void MainWindow::gameRender()
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
-    cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
+    cameraPos = QVector3D(0.0f, 0.0f, -1.0f);
 
     // Calculate camera matrix
 
     QMatrix4x4 mat;
     float aspect = float(width()) / float(height());
-    mat.perspective(60.0f, aspect, 0.2f, 5.0f);
+    mat.perspective(60.0f, aspect, 0.2f, 30.0f);
     mat.translate(cameraPos);
-    mat.rotate(50.0f, QVector3D(-1.0f, 0.0f, 0.0f));
+    mat.rotate(60.0f, QVector3D(-1.0f, 0.0f, 0.0f));
     mat.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
     mat.translate(-snake_->getPosition());
 
@@ -80,8 +80,9 @@ void MainWindow::initializeGL() {
     gl->glEnable(GL_DEPTH_TEST);
     gl->glDepthMask(GL_TRUE);
     gl->glDepthFunc(GL_LESS);
+    gl->glDepthRangef(0.2f, 30.0f);
 
-    snake_->initRendering(gl);
+    snake_->initShaders();
 
     cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
 

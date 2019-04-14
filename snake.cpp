@@ -62,47 +62,32 @@ void Snake::steer(int dir)
 }
 
 
-void Snake::initRendering(QOpenGLFunctions *gl)
+void Snake::initShaders()
 {
-    // Initialize Vertex Buffer Object
-    gl->glGenBuffers(1, &vbo_);
-    gl->glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-
-    // Allocate memory for snake vertices
-    gl->glBufferData(GL_ARRAY_BUFFER, 50000, nullptr, GL_DYNAMIC_DRAW);
-
-    // Vertex positions
-    gl->glEnableVertexAttribArray(0);
-    gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-
-    // Vertex normals
-    gl->glEnableVertexAttribArray(1);
-    gl->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(3));
-
     shaderProgram_.addShaderFromSourceCode(QOpenGLShader::Vertex,
         "attribute highp vec4 aVertex;\n"
-        "attribute highp vec3 aNormal;\n"
+        "attribute highp vec4 aNormal;\n"
         "uniform highp mat4 viewMatrix;\n"
-        "varying mediump vec3 normal;\n"
-        "varying mediump vec3 pos;\n"
+        "varying highp vec4 normal;\n"
         "void main(void)\n"
         "{\n"
-        "   vec4 position = viewMatrix * aVertex;\n"
-        "   gl_Position = position;\n"
+        "   gl_Position = viewMatrix * aVertex;\n"
         "   normal = aNormal;\n"
-        "   pos = aVertex.xyz;\n"
         "}");
     shaderProgram_.addShaderFromSourceCode(QOpenGLShader::Fragment,
-        "varying mediump vec3 normal;\n"
-        "varying mediump vec3 pos;\n"
+        "varying highp vec4 normal;\n"
         "void main(void)\n"
         "{\n"
-//        "   gl_FragColor = vec4(normal, 1.0f);\n"
-        "   gl_FragColor = vec4(pos.y*1.0f, 0.6f, 0.0f, 1.0f);\n"
+        "   gl_FragColor = vec4(normal.xyz, 1.0f);\n"
         "}");
 
     shaderProgram_.bindAttributeLocation("aVertex", 0);
     shaderProgram_.bindAttributeLocation("aNormal", 1);
+
+    shaderProgram_.enableAttributeArray(0);
+    shaderProgram_.enableAttributeArray(1);
+    shaderProgram_.setAttributeBuffer(0, GL_FLOAT, 0, 3);
+    shaderProgram_.setAttributeBuffer(1, GL_FLOAT, 0, 3);
 
     // Link shader program to OpenGL
     shaderProgram_.link();
@@ -110,16 +95,15 @@ void Snake::initRendering(QOpenGLFunctions *gl)
 
 void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix)
 {
-    gl->glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    QVector<GLfloat> vertexData;
+    QVector<GLfloat> normalData;
+    QVector<GLuint> indexData;
 
-    QVector<GLuint> indices;
+    for (int loop = 0; loop < tail_.size()-1; ++loop) {
+        QVector3D v0 = tail_.at(loop);
+        QVector3D v1 = tail_.at(loop+1);
 
-    for (int i = 0; i < tail_.size()-1; ++i) {
-        GLfloat data[16 * 6]; //16 vertices, xyz for position, xyz, for normal
-
-        QVector3D v0 = tail_.at(i);
-        QVector3D v1 = tail_.at(i+1);
-
+        // Normalized vector towards the next part of tail
         QVector3D norm = (v1-v0).normalized();
 
         for (int radial = 0; radial < 16; ++radial)
@@ -127,39 +111,48 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix)
             float angle = float(radial) / 16.0f * float(M_PI * 2);
 
             // Vertex position
-            data[0 + radial*6] = v0.x() - norm.y() * cosf(angle) * 0.06f;
-            data[1 + radial*6] = v0.y() + norm.x() * cosf(angle) * 0.06f;
-            data[2 + radial*6] = 0.06f * sinf(angle);
+            vertexData.push_back(v0.x() - norm.y() * cosf(angle) * 0.03f);
+            vertexData.push_back(v0.y() + norm.x() * cosf(angle) * 0.03f);
+            vertexData.push_back(0.03f * sinf(angle));
 
             // Vertex normal
-            data[3 + radial*6] = -norm.y() * cosf(angle);
-            data[4 + radial*6] = norm.x() * cosf(angle);
-            data[5 + radial*6] = sinf(angle);
+            normalData.push_back(-norm.y() * cosf(angle));
+            normalData.push_back(norm.x() * cosf(angle));
+            normalData.push_back(sinf(angle));
 
-            // Order vertex indices so that a cylinder is formed
+            // Order vertex indices so that a cylinder is formed out of triangles
+
+            // Don't add nonexistent indices at end of tail
+            if (loop == tail_.size()-2)
+                continue;
 
             // First triangle of quad
-            indices.push_back(GLuint(i*16 + radial));
-            indices.push_back(GLuint(i*16 + (radial + 1)%16 ));
-            indices.push_back(GLuint((i+1)*16 + (radial + 1)%16 ));
+            indexData.push_back(GLuint(loop*16 + radial));
+            indexData.push_back(GLuint(loop*16 + (radial + 1)%16 ));
+            indexData.push_back(GLuint((loop+1)*16 + (radial + 1)%16 ));
 
             // Second triangle of quad
-            indices.push_back(GLuint(i*16 + radial));
-            indices.push_back(GLuint((i+1)*16 + (radial + 1)%16 ));
-            indices.push_back(GLuint((i+1)*16 + radial));
+            indexData.push_back(GLuint(loop*16 + radial));
+            indexData.push_back(GLuint((loop+1)*16 + (radial + 1)%16 ));
+            indexData.push_back(GLuint((loop+1)*16 + radial));
         }
-
-        // Update mesh vertex data at offset
-        GLintptr offset = sizeof(data) * GLuint(i);
-        gl->glBufferSubData(GL_ARRAY_BUFFER, offset, sizeof(data), &data);
     }
 
-    // Apply shader and finally draw snake
+    // Bind shader to OpenGL
     shaderProgram_.bind();
+
+    // Enable vertex and normal arrays and insert data to buffers
+    shaderProgram_.enableAttributeArray(0);
+    shaderProgram_.enableAttributeArray(1);
+    shaderProgram_.setAttributeArray(0, vertexData.constData(), 3);
+    shaderProgram_.setAttributeArray(1, normalData.constData(), 3);
+
     shaderProgram_.setUniformValue("viewMatrix", viewMatrix);
 
-    gl->glDrawElements(GL_TRIANGLES, indices.count(),
-                       GL_UNSIGNED_INT, indices.data());
+    // Finally draw the snake as triangles
+    gl->glDrawElements(GL_TRIANGLES, indexData.count(),
+                       GL_UNSIGNED_INT, indexData.constData());
 
-    gl->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    shaderProgram_.disableAttributeArray(0);
+    shaderProgram_.disableAttributeArray(1);
 }
