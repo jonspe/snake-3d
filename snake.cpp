@@ -66,28 +66,47 @@ void Snake::initShaders()
 {
     shaderProgram_.addShaderFromSourceCode(QOpenGLShader::Vertex,
         "attribute highp vec4 aVertex;\n"
-        "attribute highp vec4 aNormal;\n"
+        "attribute highp vec3 aLocalNormal;\n"
+        "attribute highp vec3 aWorldNormal;\n"
+        "attribute highp vec3 aTail;\n"
+        "uniform highp mat4 projectionMatrix;\n"
         "uniform highp mat4 viewMatrix;\n"
-        "varying highp vec4 normal;\n"
+        "uniform highp mat4 modelMatrix;\n"
+        "varying highp vec3 localNormal;\n"
+        "varying highp vec3 worldNormal;\n"
+        "varying highp vec3 tail;\n"
         "void main(void)\n"
         "{\n"
-        "   gl_Position = viewMatrix * aVertex;\n"
-        "   normal = aNormal;\n"
+        "   vec3 newPos = aVertex.xyz;\n"
+        "   gl_Position = viewMatrix * vec4(newPos, 1.0f);\n"
+        "   localNormal = aLocalNormal;\n"
+        "   worldNormal = aWorldNormal;\n"
+        "   tail = aTail;\n"
         "}");
     shaderProgram_.addShaderFromSourceCode(QOpenGLShader::Fragment,
-        "varying highp vec4 normal;\n"
-        "void main(void)\n"
-        "{\n"
-        "   gl_FragColor = vec4(normal.xyz, 1.0f);\n"
+        "varying highp vec3 localNormal;"
+        "varying highp vec3 worldNormal;"
+        "varying highp vec3 tail;" // tail: x = pos, y = bulge, z = ?
+        "const vec3 baseColor = vec3(0.2f, 0.7f, 0.1f);"
+        "const vec3 texColor = vec3(0.4f, 1.0f, 0.2f);"
+        "const vec3 lightDir = vec3(0.707f, 0.707f, 0.707f);"
+        "void main(void)"
+        "{"
+        "   float transition = .5*pow(sin(localNormal.x*7+tail.x*36), 2) - 0.7 + .7*sin(tail.x*64);"
+        "   vec3 albedo = mix(baseColor, texColor, pow(transition,2));"
+        "   float lighting = clamp(dot(worldNormal, lightDir), 0, 1);"
+        "   gl_FragColor = vec4(0.3*albedo + 0.7*albedo*lighting, 1.0f);"
         "}");
 
     shaderProgram_.bindAttributeLocation("aVertex", 0);
-    shaderProgram_.bindAttributeLocation("aNormal", 1);
+    shaderProgram_.bindAttributeLocation("aLocalNormal", 1);
+    shaderProgram_.bindAttributeLocation("aWorldNormal", 2);
+    shaderProgram_.bindAttributeLocation("aTail", 3);
 
-    shaderProgram_.enableAttributeArray(0);
-    shaderProgram_.enableAttributeArray(1);
     shaderProgram_.setAttributeBuffer(0, GL_FLOAT, 0, 3);
     shaderProgram_.setAttributeBuffer(1, GL_FLOAT, 0, 3);
+    shaderProgram_.setAttributeBuffer(2, GL_FLOAT, 0, 3);
+    shaderProgram_.setAttributeBuffer(3, GL_FLOAT, 0, 3);
 
     // Link shader program to OpenGL
     shaderProgram_.link();
@@ -96,10 +115,14 @@ void Snake::initShaders()
 void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix)
 {
     QVector<GLfloat> vertexData;
-    QVector<GLfloat> normalData;
+    QVector<GLfloat> localNormalData;
+    QVector<GLfloat> worldNormalData;
+    QVector<GLfloat> tailData;
     QVector<GLuint> indexData;
 
-    for (int loop = 0; loop < tail_.size()-1; ++loop) {
+    int tailSize = tail_.size();
+
+    for (int loop = 0; loop < tailSize-1; ++loop) {
         QVector3D v0 = tail_.at(loop);
         QVector3D v1 = tail_.at(loop+1);
 
@@ -115,15 +138,25 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix)
             vertexData.push_back(v0.y() + norm.x() * cosf(angle) * 0.03f);
             vertexData.push_back(0.03f * sinf(angle));
 
-            // Vertex normal
-            normalData.push_back(-norm.y() * cosf(angle));
-            normalData.push_back(norm.x() * cosf(angle));
-            normalData.push_back(sinf(angle));
+            // Vertex normals
+            localNormalData.push_back(cosf(angle));
+            localNormalData.push_back(0.0f);
+            localNormalData.push_back(sinf(angle));
+            worldNormalData.push_back(-norm.y() * cosf(angle));
+            worldNormalData.push_back(norm.x() * cosf(angle));
+            worldNormalData.push_back(sinf(angle));
+
+            float pos = loop * SNAKE_SEGMENT_DIST;
+
+            // Tail data (relative position from head)
+            tailData.push_back(pos); // tail position
+            tailData.push_back(0.02f); // bulge (variable for eating food)
+            tailData.push_back(0.0f); // tba
 
             // Order vertex indices so that a cylinder is formed out of triangles
 
             // Don't add nonexistent indices at end of tail
-            if (loop == tail_.size()-2)
+            if (loop == tailSize-2)
                 continue;
 
             // First triangle of quad
@@ -144,8 +177,13 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix)
     // Enable vertex and normal arrays and insert data to buffers
     shaderProgram_.enableAttributeArray(0);
     shaderProgram_.enableAttributeArray(1);
+    shaderProgram_.enableAttributeArray(2);
+    shaderProgram_.enableAttributeArray(3);
+
     shaderProgram_.setAttributeArray(0, vertexData.constData(), 3);
-    shaderProgram_.setAttributeArray(1, normalData.constData(), 3);
+    shaderProgram_.setAttributeArray(1, localNormalData.constData(), 3);
+    shaderProgram_.setAttributeArray(2, worldNormalData.constData(), 3);
+    shaderProgram_.setAttributeArray(3, tailData.constData(), 3);
 
     shaderProgram_.setUniformValue("viewMatrix", viewMatrix);
 
@@ -155,4 +193,6 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix)
 
     shaderProgram_.disableAttributeArray(0);
     shaderProgram_.disableAttributeArray(1);
+    shaderProgram_.disableAttributeArray(2);
+    shaderProgram_.disableAttributeArray(3);
 }

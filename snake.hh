@@ -24,7 +24,7 @@
 
 const float SNAKE_HEAD_LENGTH = 0.06f;
 const float SNAKE_TAIL_END_LENGTH = 0.06f;
-const float SNAKE_SEGMENT_DIST = 0.035f;
+const float SNAKE_SEGMENT_DIST = 0.04f;
 
 const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
 
@@ -48,6 +48,7 @@ private:
 
     QVector<QVector3D> tail_;
 
+    float foodPos_ = 0.0f;
     QOpenGLShaderProgram shaderProgram_;
 };
 

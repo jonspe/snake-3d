@@ -21,7 +21,7 @@ MainWindow::MainWindow() {
     setMinimumSize(MIN_SIZE);
 
     // Game init
-    snake_ = new Snake(3.4f, 0.7f, 4.0f);
+    snake_ = new Snake(1.4f, 0.7f, 4.0f);
     snake_->steer(1);
 
     connect(&timer_, &QTimer::timeout, this, &MainWindow::gameUpdate);
@@ -49,12 +49,12 @@ void MainWindow::gameRender()
 {
     // Clear previous image
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
 
     rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
     cameraPos = QVector3D(0.0f, 0.0f, -1.0f);
 
     // Calculate camera matrix
-
     QMatrix4x4 mat;
     float aspect = float(width()) / float(height());
     mat.perspective(60.0f, aspect, 0.2f, 30.0f);
