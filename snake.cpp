@@ -90,9 +90,9 @@ void Snake::initShaders()
         "const vec3 lightDir = vec3(0.8f, 0.4f, 0.8f);"
         "void main(void)"
         "{"
-        "   float transition = clamp(.5*sin(localNormal.x*7+tail.x*36) + .7*sin(tail.x*64) + 0.5, 0, 1);"
+        "   float transition = step(0, .5*sin(localNormal.x*7+tail.x*36) + .7*sin(tail.x*64));"
         "   vec3 albedo = mix(baseColor, texColor, transition);"
-        "   float lighting = smoothstep(0.1f, 0.3f, dot(worldNormal, lightDir));"
+        "   float lighting = step(0.2f, dot(worldNormal, lightDir));"
         "   gl_FragColor = vec4(0.7*albedo + 0.3*albedo*lighting, 1.0f);"
         "}");
 
