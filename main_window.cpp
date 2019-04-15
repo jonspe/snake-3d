@@ -22,6 +22,7 @@ MainWindow::MainWindow() {
 
     QSurfaceFormat format;
     format.setDepthBufferSize(16);
+    format.setSamples(4);
     setFormat(format);
 
     // Game init
@@ -46,18 +47,12 @@ void MainWindow::gameUpdate()
     float timeDelta = float(ns-prevNs_) * 1.0f/1000000000.0f;
     prevNs_ = ns;
 
-    if (isKeyDown(Qt::Key_A))
-        snake_->steer(1);
-    else if (isKeyDown(Qt::Key_D))
-        snake_->steer(-1);
-    else
-        snake_->steer(0);
-
     snake_->update(timeDelta);
 }
 
 void MainWindow::paintGL()
 {
+    handleInput();
     gameUpdate();
 
     // Clear previous image
@@ -90,6 +85,7 @@ void MainWindow::initializeGL()
     gl = new QOpenGLFunctions;
     gl->initializeOpenGLFunctions();
 
+    gl->glEnable(GL_MULTISAMPLE);
     gl->glEnable(GL_CULL_FACE);
     gl->glEnable(GL_DEPTH_TEST);
     gl->glDepthMask(GL_TRUE);
@@ -98,21 +94,44 @@ void MainWindow::initializeGL()
     snake_->initShaders();
 }
 
+void MainWindow::handleInput()
+{
+    if (isKeyDown(Qt::Key_A))
+        snake_->steer(1);
+    else if (isKeyDown(Qt::Key_D))
+        snake_->steer(-1);
+    else
+        snake_->steer(0);
+
+    if (wasKeyDown(Qt::Key_F11))
+        toggleFullscreen();
+
+    keyPressMap.clear();
+}
+
 bool MainWindow::isKeyDown(int key)
 {
-    if (keyMap.find(key) == keyMap.end())
+    if (keyHoldMap.find(key) == keyHoldMap.end())
         return false;
-    return keyMap[key];
+    return keyHoldMap[key];
+}
+
+bool MainWindow::wasKeyDown(int key)
+{
+    if (keyPressMap.find(key) == keyPressMap.end())
+        return false;
+    return keyPressMap[key];
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
     if (event->isAutoRepeat()) return;
-    keyMap[event->key()] = true;
+    keyHoldMap[event->key()] = true;
+    keyPressMap[event->key()] = true;
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
     if (event->isAutoRepeat()) return;
-    keyMap[event->key()] = false;
+    keyHoldMap[event->key()] = false;
 }

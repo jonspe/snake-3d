@@ -63,9 +63,13 @@ private:
     QVector<PowerUp*> powerUps_;
 
     // Input
-    bool isKeyDown(int key);
+    void handleInput();
 
-    QMap<int, bool> keyMap;
+    bool isKeyDown(int key);
+    bool wasKeyDown(int key);
+
+    QMap<int, bool> keyHoldMap;
+    QMap<int, bool> keyPressMap;
 
     // Rendering
     QVector3D cameraPos;
