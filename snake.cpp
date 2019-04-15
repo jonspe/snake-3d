@@ -87,13 +87,13 @@ void Snake::initShaders()
         "varying highp vec3 tail;" // tail: x = pos, y = bulge, z = ?
         "const vec3 baseColor = vec3(0.2f, 0.7f, 0.1f);"
         "const vec3 texColor = vec3(0.4f, 1.0f, 0.2f);"
-        "const vec3 lightDir = vec3(0.707f, 0.707f, 0.707f);"
+        "const vec3 lightDir = vec3(0.8f, 0.4f, 0.8f);"
         "void main(void)"
         "{"
         "   float transition = clamp(.5*sin(localNormal.x*7+tail.x*36) + .7*sin(tail.x*64) + 0.5, 0, 1);"
         "   vec3 albedo = mix(baseColor, texColor, transition);"
-        "   float lighting = clamp(dot(worldNormal, lightDir), 0, 1);"
-        "   gl_FragColor = vec4(0.3*albedo + 0.7*albedo*lighting, 1.0f);"
+        "   float lighting = smoothstep(0.1f, 0.3f, dot(worldNormal, lightDir));"
+        "   gl_FragColor = vec4(0.7*albedo + 0.3*albedo*lighting, 1.0f);"
         "}");
 
     shaderProgram_.bindAttributeLocation("aVertex", 0);
