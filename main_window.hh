@@ -46,16 +46,15 @@ public:
     void keyReleaseEvent(QKeyEvent* event) override;
     void toggleFullscreen();
 
-    void gameRender();
 protected:
     virtual void initializeGL() override;
+    virtual void paintGL() override;
 
 private slots:
     void gameUpdate();
 
 private:
     // Timers
-    QTimer timer_;
     QElapsedTimer elapsedTimer_;
     qint64 prevNs_;
 

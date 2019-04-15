@@ -20,11 +20,16 @@ MainWindow::MainWindow() {
     resize(DEFAULT_SIZE);
     setMinimumSize(MIN_SIZE);
 
+    QSurfaceFormat format;
+    format.setDepthBufferSize(16);
+    setFormat(format);
+
     // Game init
-    snake_ = new Snake(1.4f, 0.7f, 4.0f);
+    snake_ = new Snake(3.4f, 0.7f, 4.0f);
     snake_->steer(1);
 
-    connect(&timer_, &QTimer::timeout, this, &MainWindow::gameUpdate);
+    prevNs_ = 0;
+    elapsedTimer_.start();
 }
 
 void MainWindow::toggleFullscreen()
@@ -42,11 +47,12 @@ void MainWindow::gameUpdate()
     prevNs_ = ns;
 
     snake_->update(timeDelta);
-    gameRender();
 }
 
-void MainWindow::gameRender()
+void MainWindow::paintGL()
 {
+    gameUpdate();
+
     // Clear previous image
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
@@ -55,24 +61,25 @@ void MainWindow::gameRender()
     cameraPos = QVector3D(0.0f, 0.0f, -1.0f);
 
     // Calculate camera matrix
-    QMatrix4x4 mat;
+    QMatrix4x4 mvpMatrix;
     float aspect = float(width()) / float(height());
-    mat.perspective(60.0f, aspect, 0.2f, 30.0f);
-    mat.translate(cameraPos);
-    mat.rotate(60.0f, QVector3D(-1.0f, 0.0f, 0.0f));
-    mat.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
-    mat.translate(-snake_->getPosition());
+    mvpMatrix.perspective(60.0f, aspect, 0.2f, 10.0f);
+    mvpMatrix.translate(cameraPos);
+    mvpMatrix.rotate(60.0f, QVector3D(-1.0f, 0.0f, 0.0f));
+    mvpMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
+    mvpMatrix.translate(-snake_->getPosition());
 
-    snake_->render(gl, mat);
+    snake_->render(gl, mvpMatrix);
 
     // Empty buffers
     gl->glFlush();
 
-    // Window requires updating to show rendered result
+    // Show image and when call paintGL again next frame
     update();
 }
 
-void MainWindow::initializeGL() {
+void MainWindow::initializeGL()
+{
     gl = new QOpenGLFunctions;
     gl->initializeOpenGLFunctions();
 
@@ -80,17 +87,8 @@ void MainWindow::initializeGL() {
     gl->glEnable(GL_DEPTH_TEST);
     gl->glDepthMask(GL_TRUE);
     gl->glDepthFunc(GL_LESS);
-    gl->glDepthRangef(0.2f, 30.0f);
 
     snake_->initShaders();
-
-    cameraPos = QVector3D(0.0f, 0.0f, -2.1f);
-
-    timer_.setInterval(16);
-    timer_.start();
-
-    prevNs_ = 0;
-    elapsedTimer_.start();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
