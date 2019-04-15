@@ -46,6 +46,13 @@ void MainWindow::gameUpdate()
     float timeDelta = float(ns-prevNs_) * 1.0f/1000000000.0f;
     prevNs_ = ns;
 
+    if (isKeyDown(Qt::Key_A))
+        snake_->steer(1);
+    else if (isKeyDown(Qt::Key_D))
+        snake_->steer(-1);
+    else
+        snake_->steer(0);
+
     snake_->update(timeDelta);
 }
 
@@ -91,42 +98,21 @@ void MainWindow::initializeGL()
     snake_->initShaders();
 }
 
+bool MainWindow::isKeyDown(int key)
+{
+    if (keyMap.find(key) == keyMap.end())
+        return false;
+    return keyMap[key];
+}
+
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
-    // Ignore repeated keys
     if (event->isAutoRepeat()) return;
-    qDebug() << event->key();
-
-    switch(event->key()) {
-    case Qt::Key_F11:
-        toggleFullscreen();
-        break;
-    case Qt::Key_A:
-        snake_->steer(1);
-        break;
-    case Qt::Key_D:
-        snake_->steer(-1);
-        break;
-
-    default:
-        break;
-    }
+    keyMap[event->key()] = true;
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event)
 {
-    // Ignore repeated keys
     if (event->isAutoRepeat()) return;
-
-    switch(event->key()) {
-    case Qt::Key_A:
-        snake_->steer(0);
-        break;
-    case Qt::Key_D:
-        snake_->steer(0);
-        break;
-
-    default:
-        break;
-    }
+    keyMap[event->key()] = false;
 }

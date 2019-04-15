@@ -62,6 +62,11 @@ private:
     Snake* snake_;
     QVector<PowerUp*> powerUps_;
 
+    // Input
+    bool isKeyDown(int key);
+
+    QMap<int, bool> keyMap;
+
     // Rendering
     QVector3D cameraPos;
     QOpenGLFunctions* gl;
