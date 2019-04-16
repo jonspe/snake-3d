@@ -26,7 +26,7 @@ MainWindow::MainWindow() {
     setFormat(format);
 
     // Game init
-    snake_ = new Snake(2.7f, 0.7f, 4.0f);
+    snake_ = new Snake(1.0f, 0.7f, 4.0f);
     snake_->steer(1);
 
     prevNs_ = 0;

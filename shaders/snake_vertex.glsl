@@ -1,4 +1,3 @@
-#define PI 3.1415926535897932384626433832795
 
 attribute highp vec4 aVertex;
 attribute highp vec3 aNormal;
@@ -11,6 +10,8 @@ varying highp vec3 normal;
 varying highp vec3 tail;
 
 
+const float PI = 3.141592;
+
 const float THICKNESS = 0.05f;
 const float HEAD_LENGTH = 0.2f;
 const float TAIL_END_LENGTH = 0.25f;
@@ -19,10 +20,17 @@ const float TAIL_END_LENGTH = 0.25f;
 float calcThickness(float pos)
 {
     if (pos < HEAD_LENGTH)
-        return sin((pos/HEAD_LENGTH) * PI * 0.6f) * 0.06f;
+    {
+        return 1.2 * THICKNESS * sin((pos/HEAD_LENGTH) * PI * 0.6f);
+    }
     else if (pos > tailLength - TAIL_END_LENGTH)
-        return 0.5 * THICKNESS * sin((1+pos/HEAD_LENGTH) * PI/2);
-    return THICKNESS * (1-pos/tailLength*0.5);
+    {
+        float posTail = pos - tailLength + TAIL_END_LENGTH;
+        return 0.5 * THICKNESS * (1-smoothstep(0, 1, posTail/TAIL_END_LENGTH));
+    }
+
+    float bodyLength = tailLength-TAIL_END_LENGTH-HEAD_LENGTH;
+    return THICKNESS * (1 - 0.5 * (pos-HEAD_LENGTH)/bodyLength);
 }
 
 void main(void)

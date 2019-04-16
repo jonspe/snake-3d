@@ -76,6 +76,11 @@ void Snake::loadShaders()
     shaderProgram_.setAttributeBuffer("aVertex", GL_FLOAT, 0, 3);
     shaderProgram_.setAttributeBuffer("aNormal", GL_FLOAT, 0, 3);
     shaderProgram_.setAttributeBuffer("aTail", GL_FLOAT, 0, 3);
+
+    // Enable vertex and normal arrays
+    shaderProgram_.enableAttributeArray("aVertex");
+    shaderProgram_.enableAttributeArray("aNormal");
+    shaderProgram_.enableAttributeArray("aTail");
 }
 
 void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
@@ -142,10 +147,10 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
     // Bind shader to OpenGL
     shaderProgram_.bind();
 
-    // Enable vertex and normal arrays and insert data to buffers
-    shaderProgram_.enableAttributeArray("aVertex");
-    shaderProgram_.enableAttributeArray("aNormal");
-    shaderProgram_.enableAttributeArray("aTail");
+//    // Enable vertex and normal arrays and insert data to buffers
+//    shaderProgram_.enableAttributeArray("aVertex");
+//    shaderProgram_.enableAttributeArray("aNormal");
+//    shaderProgram_.enableAttributeArray("aTail");
 
     shaderProgram_.setAttributeArray("aVertex", vertexData.constData(), 3);
     shaderProgram_.setAttributeArray("aNormal", normalData.constData(), 3);
@@ -158,7 +163,7 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
     gl->glDrawElements(GL_TRIANGLES, indexData.count(),
                        GL_UNSIGNED_INT, indexData.constData());
 
-    shaderProgram_.disableAttributeArray("aVertex");
-    shaderProgram_.disableAttributeArray("aNormal");
-    shaderProgram_.disableAttributeArray("aTail");
+//    shaderProgram_.disableAttributeArray("aVertex");
+//    shaderProgram_.disableAttributeArray("aNormal");
+//    shaderProgram_.disableAttributeArray("aTail");
 }

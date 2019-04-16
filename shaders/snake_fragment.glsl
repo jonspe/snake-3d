@@ -12,7 +12,7 @@ void main(void)
    float lightMult = step(.2, dot(normal, lightDir));
 
    float texFade = step(0, .4*sin(tail.x*24 + cos(tail.z*2)*4) + .7*sin(tail.x*48));
-   float lengthFade = 0.7*tail.x/tailLength;
+   float lengthFade = 0.5*tail.x/tailLength;
 
    vec3 tex = mix(baseColor, texColor, texFade);
    vec3 albedo = mix(tex, fadeColor, lengthFade);
