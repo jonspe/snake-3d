@@ -14,8 +14,6 @@
 #include "main_window.hh"
 
 MainWindow::MainWindow() {
-    resourceManager_ = new ResourceManager;
-
     // Window settings
     setTitle("Snakey Boi");
     resize(DEFAULT_SIZE);
@@ -25,10 +23,6 @@ MainWindow::MainWindow() {
     format.setDepthBufferSize(16);
     format.setSamples(4);
     setFormat(format);
-
-    // Game init
-    snake_ = new Snake(3.0f, 0.7f, 4.0f);
-    snake_->steer(1);
 
     prevNs_ = 0;
     elapsedTimer_.start();
@@ -42,26 +36,60 @@ void MainWindow::toggleFullscreen()
         setVisibility(Visibility::FullScreen);
 }
 
-void MainWindow::gameUpdate()
+void MainWindow::addRenderable(Renderable *renderable)
+{
+    QOpenGLShaderProgram* program = renderable->getShaderProgram();
+    renderMap_[program].append(renderable);
+}
+
+void MainWindow::initializeGame()
+{
+    snake_ = new Snake(3.0f, 0.7f, 4.0f);
+    snake_->loadShaders(resourceManager_);
+    snake_->steer(1);
+
+    addRenderable(snake_);
+
+    for (int i = 0; i < 30; i++)
+    {
+        Snake* snake = new Snake(2.5f, 0.8f, 4.0f);
+        snake->setPosition(QVector3D(0, 0, 0));
+        snake->loadShaders(resourceManager_);
+        snake->steer(-1);
+        addRenderable(snake);
+        snakes.append(snake);
+    }
+}
+
+void MainWindow::updateGame()
 {
     qint64 ns = elapsedTimer_.nsecsElapsed();
     float timeDelta = float(ns-prevNs_) * 1.0f/1000000000.0f;
     prevNs_ = ns;
 
     snake_->update(timeDelta);
+
+    for (auto snake : snakes)
+    {
+        if (rand() % 30 == 0)
+            snake->steer(-1);
+        if (rand() % 31 == 0)
+            snake->steer(1);
+        if (rand() % 63 == 0)
+            snake->steer(0);
+
+        snake->update(timeDelta);
+    }
 }
 
-void MainWindow::paintGL()
+void MainWindow::renderGame()
 {
-    handleInput();
-    gameUpdate();
-
     // Clear previous image
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
 
     // Render 3D Scene
-    rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
+    rot = - (snake_->getHeading()) / 3.1415f * 180.0f + 90.0f;
     cameraPos = QVector3D(0.0f, 0.0f, -1.0f);
 
     // Calculate camera matrix
@@ -73,13 +101,34 @@ void MainWindow::paintGL()
     mvpMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
     mvpMatrix.translate(-snake_->getPosition());
 
-    snake_->render(gl, mvpMatrix);
+    for (QOpenGLShaderProgram* program : renderMap_.keys())
+    {
+        program->bind();
+        program->setUniformValue("mvpMatrix", mvpMatrix);
 
-    // Render UI
-
+        for (Renderable* renderable : renderMap_[program])
+        {
+            renderable->render(gl);
+        }
+    }
 
     // Empty buffers
     gl->glFlush();
+}
+
+void MainWindow::loadResources()
+{
+    resourceManager_ = new ResourceManager;
+    resourceManager_->createProgram("snake_program",
+                                   "snake_vertex.glsl",
+                                   "snake_fragment.glsl");
+}
+
+void MainWindow::paintGL()
+{
+    handleInput();
+    updateGame();
+    renderGame();
 
     // Show image and when call paintGL again next frame
     update();
@@ -96,7 +145,8 @@ void MainWindow::initializeGL()
     gl->glDepthMask(GL_TRUE);
     gl->glDepthFunc(GL_LESS);
 
-    snake_->loadShaders(resourceManager_);
+    loadResources();
+    initializeGame();
 }
 
 void MainWindow::handleInput()

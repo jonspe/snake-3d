@@ -34,15 +34,18 @@ const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
 class Snake : public GameObject
 {
 public:
-    Snake(float length, float speed, float steerSpeed);
+    Snake(float length = 0.6f,
+          float moveSpeed = 0.7f,
+          float steerSpeed = 4.0f);
+
     ~Snake() override;
 
     void steer(int dir);
-
-    void loadShaders(ResourceManager* resourceManager) override;
-    void render(QOpenGLFunctions *gl, QMatrix4x4 &viewMatrix) override;
-
     void update(float timeDelta) override;
+    void render(QOpenGLFunctions *gl) override;
+
+    QOpenGLShaderProgram* loadShaders(ResourceManager* resourceManager) override;
+
 private:
     float moveSpeed_;
     float steerSpeed_;

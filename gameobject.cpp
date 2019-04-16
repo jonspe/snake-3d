@@ -16,6 +16,7 @@
 
 
 GameObject::GameObject(): position_(), velocity_() {}
+
 GameObject::~GameObject() {}
 
 

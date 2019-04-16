@@ -1,6 +1,7 @@
 varying highp vec3 normal;
 varying highp vec3 tail; // tail: x = pos, y = bulge, z = ? possibly change color by length
 uniform mediump float tailLength;
+uniform mediump vec3 diffuse;
 
 const vec3 lightDir = vec3(0.8, 0.4, 0.8);
 const vec3 baseColor = vec3(0.2, 0.7, 0.2);

@@ -25,23 +25,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++14
 
 SOURCES += \
-        main.cpp \
-    snake.cpp \
-    main_window.cpp \
-    gameobject.cpp \
-    camera.cpp \
-    camera.cpp \
-    camera.cpp \
-    gameobject.cpp \
     main.cpp \
-    main_window.cpp \
     snake.cpp \
+    main_window.cpp \
+    gameobject.cpp \
     camera.cpp \
     gameobject.cpp \
-    main.cpp \
-    main_window.cpp \
-    snake.cpp \
-    resourcemanager.cpp
+    resourcemanager.cpp \
+    renderable.cpp
 
 HEADERS += \
     snake.hh \
@@ -50,19 +41,6 @@ HEADERS += \
     main_window.hh \
     gameobject.hh \
     camera.hh \
-    camera.hh \
-    camera.hh \
-    gameobject.hh \
-    main_window.hh \
-    powerup.hh \
-    renderable.hh \
-    snake.hh \
-    camera.hh \
-    gameobject.hh \
-    main_window.hh \
-    powerup.hh \
-    renderable.hh \
-    snake.hh \
     resourcemanager.hh
 
 DISTFILES += \

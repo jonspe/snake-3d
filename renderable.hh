@@ -18,6 +18,8 @@
 #include <QMatrix4x4>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLBuffer>
+#include <QList>
 
 #include "resourcemanager.hh"
 
@@ -27,15 +29,19 @@ public:
     virtual ~Renderable() {}
 
     // Create VBO, allocate memory etc.
-    virtual void loadShaders(ResourceManager* resourceManager) = 0;
+    virtual QOpenGLShaderProgram* loadShaders(ResourceManager* resourceManager) = 0;
 
     // Render the object on the GPU
-    virtual void render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix) = 0;
+    virtual void render(QOpenGLFunctions* gl) = 0;
+
+    QOpenGLShaderProgram* getShaderProgram();
 
 protected:
     QOpenGLShaderProgram* shaderProgram_;
     QMatrix4x4 modelTransform_;
 
+    QOpenGLBuffer vertexBuffer_;
+    QOpenGLBuffer indexBuffer_;
 };
 
 #endif // RENDERABLE_HH

@@ -23,6 +23,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QMap>
 
 #include <random>
 
@@ -36,7 +37,7 @@ const QSize DEFAULT_SIZE(1280, 720);
 const QSize MIN_SIZE(640, 480);
 
 
-class MainWindow : public QOpenGLWindow, protected QOpenGLFunctions {
+class MainWindow : public QOpenGLWindow {
     Q_OBJECT
 
 public:
@@ -51,23 +52,32 @@ protected:
     virtual void initializeGL() override;
     virtual void paintGL() override;
 
-private slots:
-    void gameUpdate();
-
 private:
+    using RenderMap = QMap<QOpenGLShaderProgram*, QVector<Renderable*>>;
+
+    void loadResources();
+    void initializeGame();
+    void updateGame();
+    void renderGame();
+
+    void addRenderable(Renderable* renderable);
+
     ResourceManager* resourceManager_;
 
     // Timers
     QElapsedTimer elapsedTimer_;
     qint64 prevNs_;
 
-    // Gameplay
+    // Objects
     Snake* snake_;
     QVector<PowerUp*> powerUps_;
+    RenderMap renderMap_;
+
+    // test
+    QVector<Snake*> snakes;
 
     // Input
     void handleInput();
-
     bool isKeyDown(int key);
     bool wasKeyDown(int key);
 
