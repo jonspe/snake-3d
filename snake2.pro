@@ -35,6 +35,11 @@ SOURCES += \
     gameobject.cpp \
     main.cpp \
     main_window.cpp \
+    snake.cpp \
+    camera.cpp \
+    gameobject.cpp \
+    main.cpp \
+    main_window.cpp \
     snake.cpp
 
 HEADERS += \
@@ -50,8 +55,19 @@ HEADERS += \
     main_window.hh \
     powerup.hh \
     renderable.hh \
+    snake.hh \
+    camera.hh \
+    gameobject.hh \
+    main_window.hh \
+    powerup.hh \
+    renderable.hh \
     snake.hh
 
 DISTFILES += \
     shaders/snake_fragment.glsl \
-    shaders/snake_vertex.glsl
+    shaders/snake_vertex.glsl \
+    shaders/snake_fragment.glsl \
+    shaders/snake_vertex.glsl \
+    textures/skybox/sky_bottom.tga \
+    textures/skybox/sky_horizon.tga \
+    textures/skybox/sky_top.tga
