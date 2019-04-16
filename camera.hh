@@ -4,6 +4,13 @@
 #include <QMatrix4x4>
 
 
+namespace {
+    enum class ProjectionType {
+        PERSPECTIVE,
+        ORTHO
+    };
+}
+
 class Camera
 {
 public:
@@ -18,6 +25,7 @@ public:
     void setPosition(QVector3D pos);
     void setRotation(QVector3D rot);
     void setFieldOfView(float fov);
+
 private:
     QVector3D position;
     QVector3D rotation;

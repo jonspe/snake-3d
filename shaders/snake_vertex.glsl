@@ -1,4 +1,3 @@
-
 attribute highp vec4 aVertex;
 attribute highp vec3 aNormal;
 attribute highp vec3 aTail;

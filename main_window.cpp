@@ -14,6 +14,7 @@
 #include "main_window.hh"
 
 MainWindow::MainWindow() {
+    resourceManager_ = new ResourceManager;
 
     // Window settings
     setTitle("Snakey Boi");
@@ -26,7 +27,7 @@ MainWindow::MainWindow() {
     setFormat(format);
 
     // Game init
-    snake_ = new Snake(1.0f, 0.7f, 4.0f);
+    snake_ = new Snake(3.0f, 0.7f, 4.0f);
     snake_->steer(1);
 
     prevNs_ = 0;
@@ -59,6 +60,7 @@ void MainWindow::paintGL()
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
 
+    // Render 3D Scene
     rot = -snake_->getHeading() / 3.1415f * 180.0f + 90.0f;
     cameraPos = QVector3D(0.0f, 0.0f, -1.0f);
 
@@ -72,6 +74,9 @@ void MainWindow::paintGL()
     mvpMatrix.translate(-snake_->getPosition());
 
     snake_->render(gl, mvpMatrix);
+
+    // Render UI
+
 
     // Empty buffers
     gl->glFlush();
@@ -91,7 +96,7 @@ void MainWindow::initializeGL()
     gl->glDepthMask(GL_TRUE);
     gl->glDepthFunc(GL_LESS);
 
-    snake_->loadShaders();
+    snake_->loadShaders(resourceManager_);
 }
 
 void MainWindow::handleInput()

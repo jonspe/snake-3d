@@ -29,6 +29,7 @@
 #include "renderable.hh"
 #include "snake.hh"
 #include "powerup.hh"
+#include "resourcemanager.hh"
 
 
 const QSize DEFAULT_SIZE(1280, 720);
@@ -54,6 +55,8 @@ private slots:
     void gameUpdate();
 
 private:
+    ResourceManager* resourceManager_;
+
     // Timers
     QElapsedTimer elapsedTimer_;
     qint64 prevNs_;

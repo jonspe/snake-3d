@@ -22,6 +22,8 @@
 #include "powerup.hh"
 #include "gameobject.hh"
 
+const int SNAKE_DEFINITION = 12;
+
 const float SNAKE_HEAD_LENGTH = 0.06f;
 const float SNAKE_TAIL_END_LENGTH = 0.06f;
 const float SNAKE_SEGMENT_DIST = 0.04f;
@@ -37,7 +39,7 @@ public:
 
     void steer(int dir);
 
-    void loadShaders() override;
+    void loadShaders(ResourceManager* resourceManager) override;
     void render(QOpenGLFunctions *gl, QMatrix4x4 &viewMatrix) override;
 
     void update(float timeDelta) override;

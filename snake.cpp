@@ -11,13 +11,15 @@
 */
 
 
-#include "snake.hh"
-
 #include <QDebug>
 #include <QtMath>
 
 #include <math.h>
 #include <ctime>
+
+#include "snake.hh"
+#include "resourcemanager.hh"
+
 
 #define PI_F 3.141592653f
 
@@ -62,25 +64,23 @@ void Snake::steer(int dir)
 }
 
 
-void Snake::loadShaders()
+void Snake::loadShaders(ResourceManager* resourceManager)
 {
-    // Read shaders from files
-    shaderProgram_.addShaderFromSourceFile(
-                QOpenGLShader::Vertex, "../shaders/snake_vertex.glsl");
-    shaderProgram_.addShaderFromSourceFile(
-                QOpenGLShader::Fragment, "../shaders/snake_fragment.glsl");
+    // Create unique program from vertex and fragment shaders
+    shaderProgram_ = resourceManager->createProgram("snake_program",
+                                                    "snake_vertex.glsl",
+                                                    "snake_fragment.glsl");
 
     // Link shader program to OpenGL
-    shaderProgram_.link();
+    shaderProgram_->link();
 
-    shaderProgram_.setAttributeBuffer("aVertex", GL_FLOAT, 0, 3);
-    shaderProgram_.setAttributeBuffer("aNormal", GL_FLOAT, 0, 3);
-    shaderProgram_.setAttributeBuffer("aTail", GL_FLOAT, 0, 3);
+    shaderProgram_->setAttributeBuffer("aVertex", GL_FLOAT, 0, 3);
+    shaderProgram_->setAttributeBuffer("aNormal", GL_FLOAT, 0, 3);
+    shaderProgram_->setAttributeBuffer("aTail", GL_FLOAT, 0, 3);
 
-    // Enable vertex and normal arrays
-    shaderProgram_.enableAttributeArray("aVertex");
-    shaderProgram_.enableAttributeArray("aNormal");
-    shaderProgram_.enableAttributeArray("aTail");
+    shaderProgram_->enableAttributeArray("aVertex");
+    shaderProgram_->enableAttributeArray("aNormal");
+    shaderProgram_->enableAttributeArray("aTail");
 }
 
 void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
@@ -100,9 +100,9 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
         // Normalized vector towards the next part of tail
         QVector3D norm = (v1-v0).normalized();
 
-        for (int radial = 0; radial < 16; ++radial)
+        for (int radial = 0; radial < SNAKE_DEFINITION; ++radial)
         {
-            float angle = float(radial) / 16.0f * float(M_PI * 2);
+            float angle = float(radial) / float(SNAKE_DEFINITION) * float(M_PI * 2);
             float cosAngle = cosf(angle);
 
             float xNormal = -norm.y() * cosAngle;
@@ -133,31 +133,31 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
                 continue;
 
             // First triangle of quad
-            indexData.push_back(GLuint(loop*16 + radial));
-            indexData.push_back(GLuint(loop*16 + (radial + 1)%16 ));
-            indexData.push_back(GLuint((loop+1)*16 + (radial + 1)%16 ));
+            indexData.push_back(GLuint(loop*SNAKE_DEFINITION + radial));
+            indexData.push_back(GLuint(loop*SNAKE_DEFINITION + (radial + 1)%SNAKE_DEFINITION ));
+            indexData.push_back(GLuint((loop+1)*SNAKE_DEFINITION + (radial + 1)%SNAKE_DEFINITION ));
 
             // Second triangle of quad
-            indexData.push_back(GLuint(loop*16 + radial));
-            indexData.push_back(GLuint((loop+1)*16 + (radial + 1)%16 ));
-            indexData.push_back(GLuint((loop+1)*16 + radial));
+            indexData.push_back(GLuint(loop*SNAKE_DEFINITION + radial));
+            indexData.push_back(GLuint((loop+1)*SNAKE_DEFINITION + (radial + 1)%SNAKE_DEFINITION ));
+            indexData.push_back(GLuint((loop+1)*SNAKE_DEFINITION + radial));
         }
     }
 
     // Bind shader to OpenGL
-    shaderProgram_.bind();
+    shaderProgram_->bind();
 
 //    // Enable vertex and normal arrays and insert data to buffers
 //    shaderProgram_.enableAttributeArray("aVertex");
 //    shaderProgram_.enableAttributeArray("aNormal");
 //    shaderProgram_.enableAttributeArray("aTail");
 
-    shaderProgram_.setAttributeArray("aVertex", vertexData.constData(), 3);
-    shaderProgram_.setAttributeArray("aNormal", normalData.constData(), 3);
-    shaderProgram_.setAttributeArray("aTail", tailData.constData(), 3);
+    shaderProgram_->setAttributeArray("aVertex", vertexData.constData(), 3);
+    shaderProgram_->setAttributeArray("aNormal", normalData.constData(), 3);
+    shaderProgram_->setAttributeArray("aTail", tailData.constData(), 3);
 
-    shaderProgram_.setUniformValue("mvpMatrix", mvpMatrix);
-    shaderProgram_.setUniformValue("tailLength", SNAKE_SEGMENT_DIST * tailSize);
+    shaderProgram_->setUniformValue("mvpMatrix", mvpMatrix);
+    shaderProgram_->setUniformValue("tailLength", SNAKE_SEGMENT_DIST * tailSize);
 
     // Finally draw the snake as triangles
     gl->glDrawElements(GL_TRIANGLES, indexData.count(),

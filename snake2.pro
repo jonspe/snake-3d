@@ -40,7 +40,8 @@ SOURCES += \
     gameobject.cpp \
     main.cpp \
     main_window.cpp \
-    snake.cpp
+    snake.cpp \
+    resourcemanager.cpp
 
 HEADERS += \
     snake.hh \
@@ -61,7 +62,8 @@ HEADERS += \
     main_window.hh \
     powerup.hh \
     renderable.hh \
-    snake.hh
+    snake.hh \
+    resourcemanager.hh
 
 DISTFILES += \
     shaders/snake_fragment.glsl \
