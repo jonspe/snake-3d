@@ -26,7 +26,7 @@ MainWindow::MainWindow() {
     setFormat(format);
 
     // Game init
-    snake_ = new Snake(3.4f, 0.7f, 4.0f);
+    snake_ = new Snake(2.7f, 0.7f, 4.0f);
     snake_->steer(1);
 
     prevNs_ = 0;
@@ -65,9 +65,9 @@ void MainWindow::paintGL()
     // Calculate camera matrix
     QMatrix4x4 mvpMatrix;
     float aspect = float(width()) / float(height());
-    mvpMatrix.perspective(60.0f, aspect, 0.2f, 10.0f);
+    mvpMatrix.perspective(65.0f, aspect, 0.2f, 10.0f);
     mvpMatrix.translate(cameraPos);
-    mvpMatrix.rotate(60.0f, QVector3D(-1.0f, 0.0f, 0.0f));
+    mvpMatrix.rotate(68.0f, QVector3D(-1.0f, 0.0f, 0.0f));
     mvpMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
     mvpMatrix.translate(-snake_->getPosition());
 
@@ -91,7 +91,7 @@ void MainWindow::initializeGL()
     gl->glDepthMask(GL_TRUE);
     gl->glDepthFunc(GL_LESS);
 
-    snake_->initShaders();
+    snake_->loadShaders();
 }
 
 void MainWindow::handleInput()

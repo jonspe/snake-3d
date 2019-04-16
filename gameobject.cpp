@@ -18,9 +18,7 @@
 GameObject::GameObject(): position_(), velocity_() {}
 GameObject::~GameObject() {}
 
-void GameObject::update(float delta_time) {
-    Q_UNUSED(delta_time);
-};
+
 
 QVector3D GameObject::getPosition()
 {

@@ -37,7 +37,7 @@ public:
 
     void steer(int dir);
 
-    void initShaders() override;
+    void loadShaders() override;
     void render(QOpenGLFunctions *gl, QMatrix4x4 &viewMatrix) override;
 
     void update(float timeDelta) override;
@@ -49,7 +49,6 @@ private:
     QVector<QVector3D> tail_;
 
     float foodPos_ = 0.0f;
-    QOpenGLShaderProgram shaderProgram_;
 };
 
 #endif // SNAKE_HH

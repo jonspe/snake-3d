@@ -29,7 +29,13 @@ SOURCES += \
     snake.cpp \
     main_window.cpp \
     gameobject.cpp \
-    camera.cpp
+    camera.cpp \
+    camera.cpp \
+    camera.cpp \
+    gameobject.cpp \
+    main.cpp \
+    main_window.cpp \
+    snake.cpp
 
 HEADERS += \
     snake.hh \
@@ -37,4 +43,15 @@ HEADERS += \
     renderable.hh \
     main_window.hh \
     gameobject.hh \
-    camera.hh
+    camera.hh \
+    camera.hh \
+    camera.hh \
+    gameobject.hh \
+    main_window.hh \
+    powerup.hh \
+    renderable.hh \
+    snake.hh
+
+DISTFILES += \
+    shaders/snake_fragment.glsl \
+    shaders/snake_vertex.glsl

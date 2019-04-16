@@ -71,7 +71,6 @@ private:
     QMap<int, bool> keyHoldMap;
     QMap<int, bool> keyPressMap;
 
-    // Rendering
     QVector3D cameraPos;
     QOpenGLFunctions* gl;
 

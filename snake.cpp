@@ -62,64 +62,32 @@ void Snake::steer(int dir)
 }
 
 
-void Snake::initShaders()
+void Snake::loadShaders()
 {
-    shaderProgram_.addShaderFromSourceCode(QOpenGLShader::Vertex,
-        "attribute highp vec4 aVertex;\n"
-        "attribute highp vec3 aLocalNormal;\n"
-        "attribute highp vec3 aWorldNormal;\n"
-        "attribute highp vec3 aTail;\n"
-        "uniform highp mat4 mvpMatrix;\n"
-        "varying highp vec3 localNormal;\n"
-        "varying highp vec3 worldNormal;\n"
-        "varying highp vec3 tail;\n"
-        "void main(void)\n"
-        "{\n"
-        //"   vec3 newPos = aVertex.xyz;\n"
-        "   gl_Position = mvpMatrix * aVertex;\n"
-        "   localNormal = aLocalNormal;\n"
-        "   worldNormal = aWorldNormal;\n"
-        "   tail = aTail;\n"
-        "}");
-    shaderProgram_.addShaderFromSourceCode(QOpenGLShader::Fragment,
-        "varying highp vec3 localNormal;"
-        "varying highp vec3 worldNormal;"
-        "varying highp vec3 tail;" // tail: x = pos, y = bulge, z = ?
-        "const vec3 baseColor = vec3(0.2f, 0.7f, 0.1f);"
-        "const vec3 texColor = vec3(0.4f, 1.0f, 0.2f);"
-        "const vec3 lightDir = vec3(0.8f, 0.4f, 0.8f);"
-        "void main(void)"
-        "{"
-        "   float transition = step(0, .5*sin(localNormal.x*7+tail.x*36) + .7*sin(tail.x*64));"
-        "   vec3 albedo = mix(baseColor, texColor, transition);"
-        "   float lighting = step(0.2f, dot(worldNormal, lightDir));"
-        "   gl_FragColor = vec4(0.7*albedo + 0.3*albedo*lighting, 1.0f);"
-        "}");
-
-    shaderProgram_.bindAttributeLocation("aVertex", 0);
-    shaderProgram_.bindAttributeLocation("aLocalNormal", 1);
-    shaderProgram_.bindAttributeLocation("aWorldNormal", 2);
-    shaderProgram_.bindAttributeLocation("aTail", 3);
-
-    shaderProgram_.setAttributeBuffer(0, GL_FLOAT, 0, 3);
-    shaderProgram_.setAttributeBuffer(1, GL_FLOAT, 0, 3);
-    shaderProgram_.setAttributeBuffer(2, GL_FLOAT, 0, 3);
-    shaderProgram_.setAttributeBuffer(3, GL_FLOAT, 0, 3);
+    // Read shaders from files
+    shaderProgram_.addShaderFromSourceFile(
+                QOpenGLShader::Vertex, "../shaders/snake_vertex.glsl");
+    shaderProgram_.addShaderFromSourceFile(
+                QOpenGLShader::Fragment, "../shaders/snake_fragment.glsl");
 
     // Link shader program to OpenGL
     shaderProgram_.link();
+
+    shaderProgram_.setAttributeBuffer("aVertex", GL_FLOAT, 0, 3);
+    shaderProgram_.setAttributeBuffer("aNormal", GL_FLOAT, 0, 3);
+    shaderProgram_.setAttributeBuffer("aTail", GL_FLOAT, 0, 3);
 }
 
 void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
 {
     QVector<GLfloat> vertexData;
-    QVector<GLfloat> localNormalData;
-    QVector<GLfloat> worldNormalData;
+    QVector<GLfloat> normalData;
     QVector<GLfloat> tailData;
     QVector<GLuint> indexData;
 
     int tailSize = tail_.size();
 
+    // Generate dynamic cylindrical mesh for snake
     for (int loop = 0; loop < tailSize-1; ++loop) {
         QVector3D v0 = tail_.at(loop);
         QVector3D v1 = tail_.at(loop+1);
@@ -130,26 +98,28 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
         for (int radial = 0; radial < 16; ++radial)
         {
             float angle = float(radial) / 16.0f * float(M_PI * 2);
+            float cosAngle = cosf(angle);
+
+            float xNormal = -norm.y() * cosAngle;
+            float yNormal = norm.x() * cosAngle;
+            float zNormal = sinf(angle);
 
             // Vertex position
-            vertexData.push_back(v0.x() - norm.y() * cosf(angle) * 0.04f);
-            vertexData.push_back(v0.y() + norm.x() * cosf(angle) * 0.04f);
-            vertexData.push_back(0.04f * sinf(angle));
+            vertexData.push_back(v0.x());
+            vertexData.push_back(v0.y());
+            vertexData.push_back(0.0f);
 
             // Vertex normals
-            localNormalData.push_back(cosf(angle));
-            localNormalData.push_back(0.0f);
-            localNormalData.push_back(sinf(angle));
-            worldNormalData.push_back(-norm.y() * cosf(angle));
-            worldNormalData.push_back(norm.x() * cosf(angle));
-            worldNormalData.push_back(sinf(angle));
+            normalData.push_back(xNormal);
+            normalData.push_back(yNormal);
+            normalData.push_back(zNormal);
 
             float pos = loop * SNAKE_SEGMENT_DIST;
 
             // Tail data (relative position from head)
             tailData.push_back(pos); // tail position
             tailData.push_back(0.0f); // bulge (variable for eating food)
-            tailData.push_back(0.0f); // tba
+            tailData.push_back(cosAngle); // tba
 
             // Order vertex indices so that a cylinder is formed out of triangles
 
@@ -173,24 +143,22 @@ void Snake::render(QOpenGLFunctions* gl, QMatrix4x4 &mvpMatrix)
     shaderProgram_.bind();
 
     // Enable vertex and normal arrays and insert data to buffers
-    shaderProgram_.enableAttributeArray(0);
-    shaderProgram_.enableAttributeArray(1);
-    shaderProgram_.enableAttributeArray(2);
-    shaderProgram_.enableAttributeArray(3);
+    shaderProgram_.enableAttributeArray("aVertex");
+    shaderProgram_.enableAttributeArray("aNormal");
+    shaderProgram_.enableAttributeArray("aTail");
 
-    shaderProgram_.setAttributeArray(0, vertexData.constData(), 3);
-    shaderProgram_.setAttributeArray(1, localNormalData.constData(), 3);
-    shaderProgram_.setAttributeArray(2, worldNormalData.constData(), 3);
-    shaderProgram_.setAttributeArray(3, tailData.constData(), 3);
+    shaderProgram_.setAttributeArray("aVertex", vertexData.constData(), 3);
+    shaderProgram_.setAttributeArray("aNormal", normalData.constData(), 3);
+    shaderProgram_.setAttributeArray("aTail", tailData.constData(), 3);
 
     shaderProgram_.setUniformValue("mvpMatrix", mvpMatrix);
+    shaderProgram_.setUniformValue("tailLength", SNAKE_SEGMENT_DIST * tailSize);
 
     // Finally draw the snake as triangles
     gl->glDrawElements(GL_TRIANGLES, indexData.count(),
                        GL_UNSIGNED_INT, indexData.constData());
 
-    shaderProgram_.disableAttributeArray(0);
-    shaderProgram_.disableAttributeArray(1);
-    shaderProgram_.disableAttributeArray(2);
-    shaderProgram_.disableAttributeArray(3);
+    shaderProgram_.disableAttributeArray("aVertex");
+    shaderProgram_.disableAttributeArray("aNormal");
+    shaderProgram_.disableAttributeArray("aTail");
 }

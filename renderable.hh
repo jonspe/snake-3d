@@ -15,9 +15,9 @@
 #ifndef RENDERABLE_HH
 #define RENDERABLE_HH
 
+#include <QMatrix4x4>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
-#include <QOpenGLShader>
 
 class Renderable
 {
@@ -25,10 +25,15 @@ public:
     virtual ~Renderable() {}
 
     // Create VBO, allocate memory etc.
-    virtual void initShaders() = 0;
+    virtual void loadShaders() = 0;
 
     // Render the object on the GPU
     virtual void render(QOpenGLFunctions* gl, QMatrix4x4 &viewMatrix) = 0;
+
+protected:
+    QOpenGLShaderProgram shaderProgram_;
+    QMatrix4x4 modelTransform_;
+
 };
 
 #endif // RENDERABLE_HH

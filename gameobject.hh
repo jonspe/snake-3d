@@ -23,7 +23,7 @@ public:
     GameObject();
     virtual ~GameObject();
 
-    virtual void update(float delta_time);
+    virtual void update(float delta_time) = 0;
 
     QVector3D getPosition();
     QVector3D getVelocity();
