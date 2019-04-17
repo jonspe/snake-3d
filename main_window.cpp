@@ -50,7 +50,7 @@ void MainWindow::initializeGame()
 
     addRenderable(snake_);
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 2; ++i)
     {
         Snake* snake = new Snake(2.5f, 0.8f, 4.0f);
         snake->setPosition(QVector3D(0, 0, 0));
