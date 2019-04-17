@@ -2,8 +2,8 @@
 
 ResourceManager::ResourceManager()
 {
-    textureDirectory_.setPath("../textures");
-    shaderDirectory_.setPath("../shaders");
+    textureDirectory_.setPath(":/res/textures");
+    shaderDirectory_.setPath(":/res/shaders");
 }
 
 QOpenGLTexture *ResourceManager::loadTexture(const QString &textureFileName)

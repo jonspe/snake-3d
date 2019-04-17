@@ -30,24 +30,17 @@ SOURCES += \
     main_window.cpp \
     gameobject.cpp \
     camera.cpp \
-    gameobject.cpp \
     resourcemanager.cpp \
     renderable.cpp
 
 HEADERS += \
     snake.hh \
-    powerup.hh \
-    renderable.hh \
     main_window.hh \
+    renderable.hh \
+    powerup.hh \
     gameobject.hh \
     camera.hh \
     resourcemanager.hh
 
-DISTFILES += \
-    shaders/snake_fragment.glsl \
-    shaders/snake_vertex.glsl \
-    shaders/snake_fragment.glsl \
-    shaders/snake_vertex.glsl \
-    textures/skybox/sky_bottom.tga \
-    textures/skybox/sky_horizon.tga \
-    textures/skybox/sky_top.tga
+RESOURCES += \
+    resource.qrc
