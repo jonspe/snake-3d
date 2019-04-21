@@ -37,12 +37,15 @@ const QSize DEFAULT_SIZE(1280, 720);
 const QSize MIN_SIZE(640, 480);
 
 
-class MainWindow : public QOpenGLWindow {
+class GameWindow : public QOpenGLWindow {
     Q_OBJECT
 
 public:
-    MainWindow();
-    ~MainWindow() override = default;
+    GameWindow();
+    ~GameWindow() override = default;
+
+    void addRenderable(Renderable* renderable);
+    void addGameObject(GameObject* gameObject);
 
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
@@ -53,6 +56,8 @@ protected:
     virtual void paintGL() override;
 
 private:
+    // Datastructure for renderable objects
+    // Used to sort by shader for efficient rendering, allows for low amount of shader changing
     using RenderMap = QMap<QOpenGLShaderProgram*, QVector<Renderable*>>;
 
     void loadResources();
@@ -60,34 +65,22 @@ private:
     void updateGame();
     void renderGame();
 
-    void addRenderable(Renderable* renderable);
-
     ResourceManager* resourceManager_;
 
-    // Timers
+    // Objects
+    Snake* playerSnake_;
+
+    // Input
+    QMap<int, bool> keyMap;
+
+    // Rendering
+    QOpenGLFunctions* gl;
+    RenderMap renderMap_;
+
+    // Timers for update loop
     QElapsedTimer elapsedTimer_;
     qint64 prevNs_;
 
-    // Objects
-    Snake* snake_;
-    QVector<PowerUp*> powerUps_;
-    RenderMap renderMap_;
-
-    // test
-    QVector<Snake*> snakes;
-
-    // Input
-    void handleInput();
-    bool isKeyDown(int key);
-    bool wasKeyDown(int key);
-
-    QMap<int, bool> keyHoldMap;
-    QMap<int, bool> keyPressMap;
-
-    QVector3D cameraPos;
-    QOpenGLFunctions* gl;
-
-    float rot = 0.0f;
 };
 
 

@@ -27,6 +27,7 @@
 Snake::Snake(float length, float moveSpeed , float steerSpeed):
     moveSpeed_(moveSpeed), steerSpeed_(steerSpeed), steerDir_(0)
 {
+    setSpeed(moveSpeed);
     int segments = int(length/SNAKE_SEGMENT_DIST);
 
     for (int i = 0; i < segments; ++i)
@@ -55,6 +56,8 @@ void Snake::update(float timeDelta)
 
         prevPos = tail_.at(i);
     }
+
+    foodPos_ += moveSpeed_ * timeDelta;
 }
 
 void Snake::steer(int dir)
@@ -64,7 +67,7 @@ void Snake::steer(int dir)
 
 QOpenGLShaderProgram* Snake::loadShaders(ResourceManager* resourceManager)
 {
-    // Create unique program from vertex and fragment shaders
+    // Load premade program
     shaderProgram_ = resourceManager->loadProgram("snake_program");
 
     // Link shader program to OpenGL
@@ -81,6 +84,21 @@ QOpenGLShaderProgram* Snake::loadShaders(ResourceManager* resourceManager)
     return shaderProgram_;
 }
 
+void Snake::eat()
+{
+    foodPos_ = -0.10f;
+}
+
+float bumpFunction(float x)
+{
+    if (abs(x) > 1)
+        return 0.0f;
+
+    float xm = x-1;
+    float xp = x+1;
+    return std::min(1.0f, xm*xm*xp*xp);
+}
+
 void Snake::render(QOpenGLFunctions* gl)
 {
     QVector<GLfloat> vertexData;
@@ -90,39 +108,40 @@ void Snake::render(QOpenGLFunctions* gl)
 
     int tailSize = tail_.size();
 
-    // Generate dynamic cylindrical mesh for snake
+    // Generate dynamic cylindrical mesh for snake loop by loop
     for (int loop = 0; loop < tailSize-1; ++loop) {
         QVector3D v0 = tail_.at(loop);
         QVector3D v1 = tail_.at(loop+1);
 
         // Normalized vector towards the next part of tail
-        QVector3D norm = (v1-v0).normalized();
+        QVector3D dir = (v1-v0).normalized();
 
         for (int radial = 0; radial < SNAKE_DEFINITION; ++radial)
         {
             float angle = float(radial) / float(SNAKE_DEFINITION) * float(M_PI * 2);
             float cosAngle = cosf(angle);
 
-            float xNormal = -norm.y() * cosAngle;
-            float yNormal = norm.x() * cosAngle;
+            float xNormal = -dir.y() * cosAngle;
+            float yNormal = dir.x() * cosAngle;
             float zNormal = sinf(angle);
 
             // Vertex position
-            vertexData.push_back(v0.x());
-            vertexData.push_back(v0.y());
-            vertexData.push_back(0.0f);
+            vertexData.append(v0.x());
+            vertexData.append(v0.y());
+            vertexData.append(0.0f);
 
             // Vertex normals
-            normalData.push_back(xNormal);
-            normalData.push_back(yNormal);
-            normalData.push_back(zNormal);
+            normalData.append(xNormal);
+            normalData.append(yNormal);
+            normalData.append(zNormal);
 
             float pos = loop * SNAKE_SEGMENT_DIST;
+            float bulge = bumpFunction((pos - foodPos_) * 8.0f); // size displacement for food in tail
 
             // Tail data (relative position from head)
-            tailData.push_back(pos); // tail position
-            tailData.push_back(0.0f); // bulge (variable for eating food)
-            tailData.push_back(cosAngle); // tba
+            tailData.append(pos); // tail position
+            tailData.append(bulge); // bulge (variable for eating food)
+            tailData.append(0.0f); // tba
 
             // Order vertex indices so that a cylinder is formed out of triangles
 

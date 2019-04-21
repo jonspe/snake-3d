@@ -11,9 +11,9 @@
 */
 
 
-#include "main_window.hh"
+#include "gamewindow.hh"
 
-MainWindow::MainWindow() {
+GameWindow::GameWindow() {
     // Window settings
     setTitle("Snakey Boi");
     resize(DEFAULT_SIZE);
@@ -28,7 +28,7 @@ MainWindow::MainWindow() {
     elapsedTimer_.start();
 }
 
-void MainWindow::toggleFullscreen()
+void GameWindow::toggleFullscreen()
 {
     if (visibility() == Visibility::FullScreen)
         setVisibility(Visibility::Windowed);
@@ -36,61 +36,49 @@ void MainWindow::toggleFullscreen()
         setVisibility(Visibility::FullScreen);
 }
 
-void MainWindow::addRenderable(Renderable *renderable)
+void GameWindow::addRenderable(Renderable *renderable)
 {
     QOpenGLShaderProgram* program = renderable->getShaderProgram();
     renderMap_[program].append(renderable);
 }
 
-void MainWindow::initializeGame()
+void GameWindow::addGameObject(GameObject *gameObject)
 {
-    snake_ = new Snake(3.0f, 0.7f, 4.0f);
-    snake_->loadShaders(resourceManager_);
-    snake_->steer(1);
+    // TODO: add to data structure for updating all gameobjects
+    // ________
 
-    addRenderable(snake_);
-
-    for (int i = 0; i < 2; ++i)
-    {
-        Snake* snake = new Snake(2.5f, 0.8f, 4.0f);
-        snake->setPosition(QVector3D(0, 0, 0));
-        snake->loadShaders(resourceManager_);
-        snake->steer(-1);
-        addRenderable(snake);
-        snakes.append(snake);
-    }
+    // Add to data structure for rendering objects
+    addRenderable(gameObject);
 }
 
-void MainWindow::updateGame()
+void GameWindow::initializeGame()
+{
+    playerSnake_ = new Snake(3.0f, 0.7f, 4.0f);
+    playerSnake_->loadShaders(resourceManager_);
+    playerSnake_->setDirection(QVector3D(0, 1, 0));
+
+    addRenderable(playerSnake_);
+}
+
+void GameWindow::updateGame()
 {
     qint64 ns = elapsedTimer_.nsecsElapsed();
     float timeDelta = float(ns-prevNs_) * 1.0f/1000000000.0f;
     prevNs_ = ns;
 
-    snake_->update(timeDelta);
-
-    for (auto snake : snakes)
-    {
-        if (rand() % 30 == 0)
-            snake->steer(-1);
-        if (rand() % 31 == 0)
-            snake->steer(1);
-        if (rand() % 63 == 0)
-            snake->steer(0);
-
-        snake->update(timeDelta);
-    }
+    // TODO: Update all gameobjects instead of just playerSnake
+    playerSnake_->update(timeDelta);
 }
 
-void MainWindow::renderGame()
+void GameWindow::renderGame()
 {
     // Clear previous image
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
 
     // Render 3D Scene
-    rot = - (snake_->getHeading()) / 3.1415f * 180.0f + 90.0f;
-    cameraPos = QVector3D(0.0f, 0.0f, -1.0f);
+    float rot = - (playerSnake_->getHeading()) / 3.1415f * 180.0f + 90.0f;
+    QVector3D cameraPos(0.0f, 0.0f, -1.0f);
 
     // Calculate camera matrix
     QMatrix4x4 mvpMatrix;
@@ -99,7 +87,7 @@ void MainWindow::renderGame()
     mvpMatrix.translate(cameraPos);
     mvpMatrix.rotate(68.0f, QVector3D(-1.0f, 0.0f, 0.0f));
     mvpMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
-    mvpMatrix.translate(-snake_->getPosition());
+    mvpMatrix.translate(-playerSnake_->getPosition());
 
     for (QOpenGLShaderProgram* program : renderMap_.keys())
     {
@@ -107,86 +95,89 @@ void MainWindow::renderGame()
         program->setUniformValue("mvpMatrix", mvpMatrix);
 
         for (Renderable* renderable : renderMap_[program])
-        {
             renderable->render(gl);
-        }
     }
 
     // Empty buffers
     gl->glFlush();
 }
 
-void MainWindow::loadResources()
+void GameWindow::loadResources()
 {
+    // Create single instance for a resource manager
     resourceManager_ = new ResourceManager;
+
+    // Create a shader program for snake before it is made
     resourceManager_->createProgram("snake_program",
                                    "snake_vertex.glsl",
                                    "snake_fragment.glsl");
+
+    // TODO: Load additional shaders and textures here
 }
 
-void MainWindow::paintGL()
+void GameWindow::paintGL()
 {
-    handleInput();
     updateGame();
     renderGame();
 
-    // Show image and when call paintGL again next frame
+    // Show image and call paintGL again next frame
     update();
 }
 
-void MainWindow::initializeGL()
+void GameWindow::initializeGL()
 {
+    // Create instance for handling OpenGL drawing functions
     gl = new QOpenGLFunctions;
     gl->initializeOpenGLFunctions();
 
+    // Initialize depth test settings and antialiasing
     gl->glEnable(GL_MULTISAMPLE);
     gl->glEnable(GL_CULL_FACE);
     gl->glEnable(GL_DEPTH_TEST);
     gl->glDepthMask(GL_TRUE);
-    gl->glDepthFunc(GL_LESS);
+    gl->glDepthFunc(GL_LEQUAL);
 
+    // Load textures and shaders etc
     loadResources();
+
+    // Start game after OpenGL context is created and settings applied
     initializeGame();
 }
 
-void MainWindow::handleInput()
+void GameWindow::keyPressEvent(QKeyEvent* event)
 {
-    if (isKeyDown(Qt::Key_A))
-        snake_->steer(1);
-    else if (isKeyDown(Qt::Key_D))
-        snake_->steer(-1);
-    else
-        snake_->steer(0);
+    if (event->isAutoRepeat()) return;
 
-    if (wasKeyDown(Qt::Key_F11))
+    // Set key as active (pressed down)
+    keyMap[event->key()] = true;
+
+    if (event->key() == Qt::Key_A)
+        playerSnake_->steer(1);
+    else if (event->key() == Qt::Key_D)
+        playerSnake_->steer(-1);
+    else if (event->key() == Qt::Key_F11)
         toggleFullscreen();
+    else if (event->key() == Qt::Key_Space)
+        playerSnake_->eat();
 
-    keyPressMap.clear();
 }
 
-bool MainWindow::isKeyDown(int key)
-{
-    if (keyHoldMap.find(key) == keyHoldMap.end())
-        return false;
-    return keyHoldMap[key];
-}
-
-bool MainWindow::wasKeyDown(int key)
-{
-    if (keyPressMap.find(key) == keyPressMap.end())
-        return false;
-    return keyPressMap[key];
-}
-
-void MainWindow::keyPressEvent(QKeyEvent* event)
+void GameWindow::keyReleaseEvent(QKeyEvent* event)
 {
     if (event->isAutoRepeat()) return;
-    keyHoldMap[event->key()] = true;
-    keyPressMap[event->key()] = true;
-}
 
-void MainWindow::keyReleaseEvent(QKeyEvent* event)
-{
-    if (event->isAutoRepeat()) return;
-    keyHoldMap[event->key()] = false;
+    int key = event->key();
+
+    // Steer control logic on key release, so the most recent input will apply
+    if (key == Qt::Key_A || key == Qt::Key_D)
+    {
+        playerSnake_->steer(0);
+        if (key == Qt::Key_A && keyMap[Qt::Key_D])
+            playerSnake_->steer(-1);
+        else if (key == Qt::Key_D && keyMap[Qt::Key_A])
+            playerSnake_->steer(1);
+    }
+
+    // Set key as inactive (released)
+    keyMap[event->key()] = false;
 }

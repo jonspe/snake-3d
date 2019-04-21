@@ -22,11 +22,11 @@
 #include "powerup.hh"
 #include "gameobject.hh"
 
-const int SNAKE_DEFINITION = 12;
+const int SNAKE_DEFINITION = 16;
 
 const float SNAKE_HEAD_LENGTH = 0.06f;
 const float SNAKE_TAIL_END_LENGTH = 0.06f;
-const float SNAKE_SEGMENT_DIST = 0.04f;
+const float SNAKE_SEGMENT_DIST = 0.03f;
 
 const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
 
@@ -44,6 +44,8 @@ public:
     void update(float timeDelta) override;
     void render(QOpenGLFunctions *gl) override;
 
+    void eat();
+
     QOpenGLShaderProgram* loadShaders(ResourceManager* resourceManager) override;
 
 private:
@@ -53,7 +55,7 @@ private:
 
     QVector<QVector3D> tail_;
 
-    float foodPos_ = 0.0f;
+    float foodPos_ = 500.0f;
 };
 
 #endif // SNAKE_HH

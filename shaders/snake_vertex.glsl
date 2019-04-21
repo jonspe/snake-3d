@@ -34,9 +34,13 @@ float calcThickness(float pos)
 
 void main(void)
 {
-    float thickness = calcThickness(aTail.x);
-    vec4 newPos = vec4(aVertex.xyz + aNormal * thickness + vec3(0.0, 0.0, thickness/2.0), aVertex.w);
-    gl_Position = mvpMatrix * newPos; // TODO: implement bulge from food
+    // Take food in tail into account for thickness
+    float thickness = calcThickness(aTail.x) * (1.0 + aTail.y*0.5);
+
+    // Displace snake from center of line
+    vec4 displacement = vec4(aNormal * thickness + vec3(0.0, 0.0, thickness/2.0), 0.0f);
+    gl_Position = mvpMatrix * (aVertex + displacement);
+
     normal = aNormal;
     tail = aTail;
 }

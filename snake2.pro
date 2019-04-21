@@ -27,20 +27,20 @@ CONFIG += c++14
 SOURCES += \
     main.cpp \
     snake.cpp \
-    main_window.cpp \
     gameobject.cpp \
     camera.cpp \
     resourcemanager.cpp \
-    renderable.cpp
+    renderable.cpp \
+    gamewindow.cpp
 
 HEADERS += \
     snake.hh \
-    main_window.hh \
     renderable.hh \
     powerup.hh \
     gameobject.hh \
     camera.hh \
-    resourcemanager.hh
+    resourcemanager.hh \
+    gamewindow.hh
 
 RESOURCES += \
     resource.qrc
