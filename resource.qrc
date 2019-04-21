@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/res">
+    <qresource prefix="/">
         <file>shaders/snake_fragment.glsl</file>
         <file>shaders/snake_vertex.glsl</file>
     </qresource>
