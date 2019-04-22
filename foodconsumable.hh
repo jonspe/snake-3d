@@ -16,8 +16,7 @@ public:
     QOpenGLShaderProgram* loadResources(ResourceManager* resourceManager) override;
 
 private:
-    GLfloat* vertexData;
-    GLuint* indexData;
+    MeshData* mesh;
 };
 
 #endif // FOODCONSUMABLE_HH
