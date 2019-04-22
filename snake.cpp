@@ -98,7 +98,7 @@ void Snake::steer(int dir)
     steerDir_ = dir;
 }
 
-QOpenGLShaderProgram* Snake::loadResources(ResourceManager* resourceManager)
+void Snake::loadResources(ResourceManager* resourceManager)
 {
     // Load premade program
     shaderProgram_ = resourceManager->loadProgram("snake_program");
@@ -112,8 +112,6 @@ QOpenGLShaderProgram* Snake::loadResources(ResourceManager* resourceManager)
 
     // test
     resourceManager->loadMesh("apple_mesh.obj");
-
-    return shaderProgram_;
 }
 
 void Snake::eat()

@@ -29,19 +29,17 @@ public:
     virtual ~Renderable() {}
 
     // Create VBO, allocate memory etc.
-    virtual QOpenGLShaderProgram* loadResources(ResourceManager* resourceManager) = 0;
+    virtual void loadResources(ResourceManager* resourceManager) = 0;
 
     // Render the object on the GPU
     virtual void render(QOpenGLFunctions* gl) = 0;
 
     QOpenGLShaderProgram* getShaderProgram();
+    QMatrix4x4 getModelTransform();
 
 protected:
     QOpenGLShaderProgram* shaderProgram_;
     QMatrix4x4 modelTransform_;
-
-    QOpenGLBuffer vertexBuffer_;
-    QOpenGLBuffer indexBuffer_;
 };
 
 #endif // RENDERABLE_HH

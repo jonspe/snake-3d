@@ -13,7 +13,7 @@ public:
     void update(float timeDelta) override;
     void render(QOpenGLFunctions *gl) override;
 
-    QOpenGLShaderProgram* loadResources(ResourceManager* resourceManager) override;
+    void loadResources(ResourceManager* resourceManager) override;
 
 private:
     MeshData* mesh;

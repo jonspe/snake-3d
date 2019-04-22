@@ -51,7 +51,7 @@ public:
 
     void eat();
 
-    QOpenGLShaderProgram* loadResources(ResourceManager* resourceManager) override;
+    void loadResources(ResourceManager* resourceManager) override;
 
 private:
     void processDigestItems(float timeDelta);
