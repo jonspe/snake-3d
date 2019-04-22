@@ -73,7 +73,7 @@ void Snake::processDigestItems(float timeDelta)
     for (auto it = digestItems_.begin(); it != digestItems_.end();)
     {
         DigestItem* item = *it;
-        item->position += moveSpeed_ * timeDelta * 2;
+        item->position += moveSpeed_ * timeDelta;
 
         if (item->position >= getTailLength())
         {
@@ -102,6 +102,8 @@ QOpenGLShaderProgram* Snake::loadResources(ResourceManager* resourceManager)
 {
     // Load premade program
     shaderProgram_ = resourceManager->loadProgram("snake_program");
+
+    resourceManager->loadMesh("apple_mesh.obj");
 
     // Link shader program to OpenGL
     shaderProgram_->link();
