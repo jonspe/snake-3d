@@ -4,5 +4,6 @@
         <file>shaders/snake_vertex.glsl</file>
         <file>shaders/basicShader_fragment.glsl</file>
         <file>shaders/basicShader_vertex.glsl</file>
+        <file>meshes/apple_mesh.obj</file>
     </qresource>
 </RCC>
