@@ -8,6 +8,14 @@
 #include <QMap>
 #include <QDir>
 
+
+struct MeshData {
+    QVector<QVector3D> vertexData;
+    QVector<QVector2D> uvData;
+    QVector<QVector3D> normalData;
+    QVector<GLuint> indexData;
+};
+
 class ResourceManager
 {
 public:
@@ -16,7 +24,7 @@ public:
     QOpenGLTexture* loadTexture(const QString& textureFileName);
     QOpenGLShader* loadShader(const QString& shaderFileName);
     QOpenGLShaderProgram* loadProgram(const QString& programName);
-    QOpenGLBuffer* loadMesh(const QString& meshName);
+    MeshData* loadMesh(const QString& meshName);
 
     QOpenGLShaderProgram* createProgram(const QString& programName,
                                         const QString& vertexFileName,
@@ -24,7 +32,7 @@ public:
 private:
     QMap<QString, QOpenGLTexture*> textureMap_;
     QMap<QString, QOpenGLShader*> shaderMap_;
-    QMap<QString, QOpenGLBuffer*> meshMap_;
+    QMap<QString, MeshData*> meshMap_;
     QMap<QString, QOpenGLShaderProgram*> programMap_;
 
     QDir textureDirectory_;
