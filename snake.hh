@@ -22,11 +22,11 @@
 #include "consumable.hh"
 #include "gameobject.hh"
 
-const int SNAKE_DEFINITION = 16;
+const int SNAKE_DEFINITION = 12;
 
 const float SNAKE_HEAD_LENGTH = 0.06f;
 const float SNAKE_TAIL_END_LENGTH = 0.06f;
-const float SNAKE_SEGMENT_DIST = 0.03f;
+const float SNAKE_SEGMENT_DIST = 0.04f;
 
 const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
 
