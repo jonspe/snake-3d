@@ -85,6 +85,9 @@ MeshData* ResourceManager::loadMesh(const QString &meshName)
     }
 
     meshMap_[meshName] = meshData;
+
+    qDebug() << "Mesh" << meshName << "loaded.";
+
     return meshData;
 }
 
@@ -106,6 +109,7 @@ MeshData* parseObjFile(const QString& path) {
         QVector<QVector3D> tempVertexData;
         QVector<QVector2D> tempUvData;
         QVector<QVector3D> tempNormalData;
+        uint indexCounter = 0;
 
         QTextStream in(&meshFile);
 
@@ -144,20 +148,24 @@ MeshData* parseObjFile(const QString& path) {
                 QRegularExpressionMatch match = faceExp.match(line);
 
                 // Loop through all 3 vertices of triangle
-                for (int vertIndex = 1; vertIndex <= 3; ++vertIndex)
+                for (int index = 1; index <= 3; ++index)
                 {
-                    QRegularExpressionMatch vertMatch = faceVertExp.match(match.captured(vertIndex));
+                    QRegularExpressionMatch vertMatch = faceVertExp.match(match.captured(index));
 
                     // 1st index is vertex position, 2nd index is uv, 3rd index is normal
                     // Triangles are formatted in .obj file like so, for example:
                     // f 4/2/3 6/2/1 9/2/4
-                    int vertexIndex = vertMatch.captured(1).toInt();
-                    int uvIndex = vertMatch.captured(2).toInt();
-                    int normalIndex = vertMatch.captured(3).toInt();
+                    int vertexIndex = vertMatch.captured(1).toInt() - 1;
+                    int uvIndex = vertMatch.captured(2).toInt() - 1;
+                    int normalIndex = vertMatch.captured(3).toInt() - 1;
 
                     meshData->vertexData.append(tempVertexData.at(vertexIndex));
                     meshData->uvData.append(tempUvData.at(uvIndex));
                     meshData->normalData.append(tempNormalData.at(normalIndex));
+
+                    // Temporary, uses duplicate vertices so shading is questionable
+                    // TODO: Detect duplicate vertices and adjust indices accordingly
+                    meshData->indexData.append(++indexCounter);
                 }
             }
         }
