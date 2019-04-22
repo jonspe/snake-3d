@@ -103,18 +103,15 @@ QOpenGLShaderProgram* Snake::loadResources(ResourceManager* resourceManager)
     // Load premade program
     shaderProgram_ = resourceManager->loadProgram("snake_program");
 
-    resourceManager->loadMesh("apple_mesh.obj");
-
     // Link shader program to OpenGL
     shaderProgram_->link();
-
-    shaderProgram_->setAttributeBuffer("aVertex", GL_FLOAT, 0, 3);
-    shaderProgram_->setAttributeBuffer("aNormal", GL_FLOAT, 0, 3);
-    shaderProgram_->setAttributeBuffer("aTail", GL_FLOAT, 0, 3);
 
     shaderProgram_->enableAttributeArray("aVertex");
     shaderProgram_->enableAttributeArray("aNormal");
     shaderProgram_->enableAttributeArray("aTail");
+
+    // test
+    resourceManager->loadMesh("apple_mesh.obj");
 
     return shaderProgram_;
 }
@@ -132,9 +129,9 @@ void Snake::eat()
 
 void Snake::render(QOpenGLFunctions* gl)
 {
-    QVector<GLfloat> vertexData;
-    QVector<GLfloat> normalData;
-    QVector<GLfloat> tailData;
+    QVector<QVector3D> vertexData;
+    QVector<QVector3D> normalData;
+    QVector<QVector3D> tailData;
     QVector<GLuint> indexData;
 
     int tailSize = tail_.size();
@@ -150,6 +147,7 @@ void Snake::render(QOpenGLFunctions* gl)
         float bulge = 0.0f;
         float pos = loop * SNAKE_SEGMENT_DIST;
 
+        // Calculate the sum of bumps from digestive consumable items
         for (DigestItem* item : digestItems_)
             bulge += bumpFunction((pos - item->position) * 8.0f);
 
@@ -158,24 +156,14 @@ void Snake::render(QOpenGLFunctions* gl)
             float angle = float(radial) / float(SNAKE_DEFINITION) * float(M_PI * 2);
             float cosAngle = cosf(angle);
 
+            // Calculate vertex normal with cross product
             float xNormal = -dir.y() * cosAngle;
             float yNormal = dir.x() * cosAngle;
             float zNormal = sinf(angle);
 
-            // Vertex position
-            vertexData.append(v0.x());
-            vertexData.append(v0.y());
-            vertexData.append(0.0f);
-
-            // Vertex normals
-            normalData.append(xNormal);
-            normalData.append(yNormal);
-            normalData.append(zNormal);
-
-            // Tail data (relative position from head)
-            tailData.append(pos); // tail position
-            tailData.append(bulge); // bulge (variable for eating food)
-            tailData.append(cosAngle); // angle for procedural snake texture
+            vertexData.append(v0);
+            normalData.append(QVector3D(xNormal, yNormal, zNormal));
+            tailData.append(QVector3D(pos, bulge, cosAngle));
 
             // Order vertex indices so that a cylinder is formed out of triangles
             // Could be further optimized by changing indices only when snake length is changed
@@ -196,9 +184,9 @@ void Snake::render(QOpenGLFunctions* gl)
         }
     }
 
-    shaderProgram_->setAttributeArray("aVertex", vertexData.constData(), 3);
-    shaderProgram_->setAttributeArray("aNormal", normalData.constData(), 3);
-    shaderProgram_->setAttributeArray("aTail", tailData.constData(), 3);
+    shaderProgram_->setAttributeArray("aVertex", vertexData.constData());
+    shaderProgram_->setAttributeArray("aNormal", normalData.constData());
+    shaderProgram_->setAttributeArray("aTail", tailData.constData());
 
     shaderProgram_->setUniformValue("tailLength", SNAKE_SEGMENT_DIST * tailSize);
 
