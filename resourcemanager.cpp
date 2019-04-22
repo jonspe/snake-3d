@@ -4,6 +4,7 @@ ResourceManager::ResourceManager()
 {
     textureDirectory_.setPath(":/textures");
     shaderDirectory_.setPath(":/shaders");
+    meshDirectory_.setPath(":/meshes");
 }
 
 QOpenGLTexture *ResourceManager::loadTexture(const QString &textureFileName)
@@ -61,4 +62,28 @@ QOpenGLShaderProgram *ResourceManager::createProgram(const QString &programName,
     programMap_[programName] = program;
 
     return program;
+}
+
+QOpenGLBuffer* ResourceManager::loadMesh(const QString &meshName)
+{
+    QFile meshFile(meshName);
+    QOpenGLBuffer* meshPtr = nullptr;
+
+    if (meshFile.open(QIODevice::ReadOnly))
+    {
+       QTextStream in(&meshFile);
+
+       QVector<QVector3D> vertices;
+       QVector<QVector3D> normals;
+
+       while (!in.atEnd())
+       {
+          QString line = in.readLine();
+
+
+       }
+       meshFile.close();
+    }
+
+    return meshPtr;
 }

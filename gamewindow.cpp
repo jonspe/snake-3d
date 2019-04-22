@@ -53,8 +53,8 @@ void GameWindow::addGameObject(GameObject *gameObject)
 
 void GameWindow::initializeGame()
 {
-    playerSnake_ = new Snake(3.0f, 0.7f, 4.0f);
-    playerSnake_->loadShaders(resourceManager_);
+    playerSnake_ = new Snake(1.0f, 0.7f, 4.0f);
+    playerSnake_->loadResources(resourceManager_);
     playerSnake_->setDirection(QVector3D(0, 1, 0));
 
     addRenderable(playerSnake_);
@@ -109,8 +109,12 @@ void GameWindow::loadResources()
 
     // Create a shader program for snake before it is made
     resourceManager_->createProgram("snake_program",
-                                   "snake_vertex.glsl",
-                                   "snake_fragment.glsl");
+                                    "snake_vertex.glsl",
+                                    "snake_fragment.glsl");
+
+    resourceManager_->createProgram("basicShader_program",
+                                    "basicShader_vertex.glsl",
+                                    "basicShader_fragment.glsl");
 
     // TODO: Load additional shaders and textures here
 }

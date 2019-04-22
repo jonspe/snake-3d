@@ -29,7 +29,7 @@ public:
     virtual ~Renderable() {}
 
     // Create VBO, allocate memory etc.
-    virtual QOpenGLShaderProgram* loadShaders(ResourceManager* resourceManager) = 0;
+    virtual QOpenGLShaderProgram* loadResources(ResourceManager* resourceManager) = 0;
 
     // Render the object on the GPU
     virtual void render(QOpenGLFunctions* gl) = 0;

@@ -4,6 +4,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLShader>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLBuffer>
 #include <QMap>
 #include <QDir>
 
@@ -15,6 +16,7 @@ public:
     QOpenGLTexture* loadTexture(const QString& textureFileName);
     QOpenGLShader* loadShader(const QString& shaderFileName);
     QOpenGLShaderProgram* loadProgram(const QString& programName);
+    QOpenGLBuffer* loadMesh(const QString& meshName);
 
     QOpenGLShaderProgram* createProgram(const QString& programName,
                                         const QString& vertexFileName,
@@ -22,10 +24,12 @@ public:
 private:
     QMap<QString, QOpenGLTexture*> textureMap_;
     QMap<QString, QOpenGLShader*> shaderMap_;
+    QMap<QString, QOpenGLBuffer*> meshMap_;
     QMap<QString, QOpenGLShaderProgram*> programMap_;
 
     QDir textureDirectory_;
     QDir shaderDirectory_;
+    QDir meshDirectory_;
 };
 
 #endif // RESOURCEMANAGER_HH

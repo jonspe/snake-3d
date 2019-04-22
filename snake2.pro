@@ -31,16 +31,19 @@ SOURCES += \
     camera.cpp \
     resourcemanager.cpp \
     renderable.cpp \
-    gamewindow.cpp
+    gamewindow.cpp \
+    foodconsumable.cpp \
+    consumable.cpp
 
 HEADERS += \
     snake.hh \
     renderable.hh \
-    powerup.hh \
     gameobject.hh \
     camera.hh \
     resourcemanager.hh \
-    gamewindow.hh
+    gamewindow.hh \
+    consumable.hh \
+    foodconsumable.hh
 
 RESOURCES += \
     resource.qrc

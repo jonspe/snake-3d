@@ -29,7 +29,7 @@
 
 #include "renderable.hh"
 #include "snake.hh"
-#include "powerup.hh"
+#include "consumable.hh"
 #include "resourcemanager.hh"
 
 

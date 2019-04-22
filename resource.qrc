@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>shaders/snake_fragment.glsl</file>
         <file>shaders/snake_vertex.glsl</file>
+        <file>shaders/basicShader_fragment.glsl</file>
+        <file>shaders/basicShader_vertex.glsl</file>
     </qresource>
 </RCC>

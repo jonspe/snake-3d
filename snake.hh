@@ -19,7 +19,7 @@
 #include <QOpenGLFunctions>
 
 #include "renderable.hh"
-#include "powerup.hh"
+#include "consumable.hh"
 #include "gameobject.hh"
 
 const int SNAKE_DEFINITION = 16;
@@ -44,16 +44,29 @@ public:
     void update(float timeDelta) override;
     void render(QOpenGLFunctions *gl) override;
 
+    float getTailLength();
+    void setTailLength(float length);
+
+    void applyEffect(Effect effect);
+
     void eat();
 
-    QOpenGLShaderProgram* loadShaders(ResourceManager* resourceManager) override;
+    QOpenGLShaderProgram* loadResources(ResourceManager* resourceManager) override;
 
 private:
+    void processDigestItems(float timeDelta);
+
     float moveSpeed_;
     float steerSpeed_;
     float steerDir_;
 
+    struct DigestItem {
+        Effect effect;
+        float position;
+    };
+
     QVector<QVector3D> tail_;
+    QVector<DigestItem*> digestItems_;
 
     float foodPos_ = 500.0f;
 };
