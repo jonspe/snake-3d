@@ -30,14 +30,12 @@ namespace {
 }
 
 
-Snake::Snake(float length, float moveSpeed , float steerSpeed):
-    moveSpeed_(moveSpeed), steerSpeed_(steerSpeed), steerDir_(0)
+Snake::Snake(float length, float moveSpeed , float steerSpeed): GameObject (),
+    moveSpeed_(moveSpeed), steerSpeed_(steerSpeed), steerDir_(0), heading_(0), headPosition_()
 {
-    setSpeed(moveSpeed);
     int segments = int(length/SNAKE_SEGMENT_DIST);
-
     for (int i = 0; i < segments; ++i)
-        tail_.push_back(getPosition() + QVector3D(0.0f, -i * SNAKE_SEGMENT_DIST, 0.0f));
+        tail_.push_back(transform_->getPosition() + QVector3D(0.0f, -i * SNAKE_SEGMENT_DIST, 0.0f));
 }
 
 Snake::~Snake() {}
@@ -45,17 +43,18 @@ Snake::~Snake() {}
 void Snake::update(float timeDelta)
 {
     // Multiply by move_speed_ to ensure same turning radius across speeds
-    float headingIncrement = steerDir_ * steerSpeed_ * moveSpeed_ * timeDelta;
+    heading_ += steerDir_ * steerSpeed_ * moveSpeed_ * timeDelta;
 
-    setSpeed(moveSpeed_);
-    setHeading(getHeading() + headingIncrement);
-    position_ += velocity_ * timeDelta;
+    QVector3D dir(cosf(heading_), sinf(heading_), 0);
+
+    // use separate headPosition, because snake transform should be kept default zero
+    headPosition_ += dir * moveSpeed_ * timeDelta;
 
     processDigestItems(timeDelta);
 
     // Calculate tail positions so that each is a set distance apart
     // Gives a really cool effect, like rope at 1.0 friction with ground
-    QVector3D prevPos = position_;
+    QVector3D prevPos = headPosition_;
     for (int i = 0; i < tail_.size(); ++i)
     {
         QVector3D v = tail_.at(i);
@@ -64,8 +63,6 @@ void Snake::update(float timeDelta)
 
         prevPos = tail_.at(i);
     }
-
-    foodPos_ += moveSpeed_ * timeDelta;
 }
 
 void Snake::processDigestItems(float timeDelta)
@@ -109,9 +106,6 @@ void Snake::loadResources(ResourceManager* resourceManager)
     shaderProgram_->enableAttributeArray("aVertex");
     shaderProgram_->enableAttributeArray("aNormal");
     shaderProgram_->enableAttributeArray("aTail");
-
-    // test
-    resourceManager->loadMesh("apple_mesh.obj");
 }
 
 void Snake::eat()
@@ -216,6 +210,16 @@ void Snake::setTailLength(float length)
     } else {
         tail_.resize(newSegments);
     }
+}
+
+float Snake::getHeading()
+{
+    return heading_;
+}
+
+QVector3D Snake::getHeadPosition()
+{
+    return headPosition_;
 }
 
 namespace {

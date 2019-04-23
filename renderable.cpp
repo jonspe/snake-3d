@@ -1,12 +1,18 @@
 #include "renderable.hh"
 
 
+Renderable::Renderable(): transform_(), shaderProgram_(nullptr) {
+    transform_ = new Transform;
+    shaderProgram_ = nullptr;
+}
+
 QOpenGLShaderProgram* Renderable::getShaderProgram()
 {
     return shaderProgram_;
 };
 
-QMatrix4x4 Renderable::getModelTransform()
+Transform* Renderable::getTransform()
 {
-    return modelTransform_;
+    return transform_;
 }
+

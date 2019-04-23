@@ -11,8 +11,9 @@ varying highp vec3 tail;
 
 const float PI = 3.141592;
 
+// replace later with some customization struct thing
 const float THICKNESS = 0.05;
-const float HEAD_LENGTH = 0.2;
+const float HEAD_LENGTH = 0.14;
 const float TAIL_END_LENGTH = 0.25;
 
 

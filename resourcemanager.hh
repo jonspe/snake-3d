@@ -11,7 +11,7 @@
 
 struct MeshData {
     QVector<QVector3D> vertexData;
-    QVector<QVector2D> uvData;
+    QVector<QVector2D> texcoordData;
     QVector<QVector3D> normalData;
     QVector<GLuint> indexData;
 };

@@ -56,24 +56,28 @@ protected:
     virtual void paintGL() override;
 
 private:
-    // Datastructure for renderable objects
-    // Used to sort by shader for efficient rendering, allows for low amount of shader changing
-    using RenderMap = QMap<QOpenGLShaderProgram*, QVector<Renderable*>>;
-
     void loadResources();
     void initializeGame();
     void updateGame();
     void renderGame();
 
+    void addRandomFood();
+
     ResourceManager* resourceManager_;
 
     // Objects
     Snake* playerSnake_;
+    QVector<GameObject*> gameObjects_;
 
     // Input
     QMap<int, bool> keyMap;
 
     // Rendering
+
+    // Datastructure for renderable objects
+    // Used to sort by shader for efficient rendering, allows for low amount of shader changing
+    using RenderMap = QMap<QOpenGLShaderProgram*, QVector<Renderable*>>;
+
     QOpenGLFunctions* gl;
     RenderMap renderMap_;
 

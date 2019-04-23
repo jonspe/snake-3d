@@ -47,6 +47,9 @@ public:
     float getTailLength();
     void setTailLength(float length);
 
+    float getHeading();
+    QVector3D getHeadPosition();
+
     void applyEffect(Effect effect);
 
     void eat();
@@ -56,9 +59,13 @@ public:
 private:
     void processDigestItems(float timeDelta);
 
+    QVector3D headPosition_;
+
     float moveSpeed_;
     float steerSpeed_;
     float steerDir_;
+
+    float heading_;
 
     struct DigestItem {
         Effect effect;
@@ -67,8 +74,6 @@ private:
 
     QVector<QVector3D> tail_;
     QVector<DigestItem*> digestItems_;
-
-    float foodPos_ = 500.0f;
 };
 
 #endif // SNAKE_HH

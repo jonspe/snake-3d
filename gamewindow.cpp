@@ -13,6 +13,9 @@
 
 #include "gamewindow.hh"
 
+#include "foodconsumable.hh"
+#include "densconsumable.hh"
+
 GameWindow::GameWindow() {
     // Window settings
     setTitle("Snakey Boi");
@@ -44,10 +47,7 @@ void GameWindow::addRenderable(Renderable *renderable)
 
 void GameWindow::addGameObject(GameObject *gameObject)
 {
-    // TODO: add to data structure for updating all gameobjects
-    // ________
-
-    // Add to data structure for rendering objects
+    gameObjects_.append(gameObject);
     addRenderable(gameObject);
 }
 
@@ -55,9 +55,7 @@ void GameWindow::initializeGame()
 {
     playerSnake_ = new Snake(1.0f, 0.7f, 4.0f);
     playerSnake_->loadResources(resourceManager_);
-    playerSnake_->setDirection(QVector3D(0, 1, 0));
-
-    addRenderable(playerSnake_);
+    addGameObject(playerSnake_);
 }
 
 void GameWindow::updateGame()
@@ -66,8 +64,8 @@ void GameWindow::updateGame()
     float timeDelta = float(ns-prevNs_) * 1.0f/1000000000.0f;
     prevNs_ = ns;
 
-    // TODO: Update all gameobjects instead of just playerSnake
-    playerSnake_->update(timeDelta);
+    for (GameObject* object : gameObjects_)
+        object->update(timeDelta);
 }
 
 void GameWindow::renderGame()
@@ -76,26 +74,41 @@ void GameWindow::renderGame()
     gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
 
-    // Render 3D Scene
     float rot = - (playerSnake_->getHeading()) / 3.1415f * 180.0f + 90.0f;
-    QVector3D cameraPos(0.0f, 0.0f, -1.0f);
 
-    // Calculate camera matrix
-    QMatrix4x4 mvpMatrix;
+    // Calculate camera matrix, replace with the Camera class later on
     float aspect = float(width()) / float(height());
-    mvpMatrix.perspective(65.0f, aspect, 0.2f, 10.0f);
-    mvpMatrix.translate(cameraPos);
-    mvpMatrix.rotate(68.0f, QVector3D(-1.0f, 0.0f, 0.0f));
-    mvpMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
-    mvpMatrix.translate(-playerSnake_->getPosition());
+
+    QMatrix4x4 projectionMatrix;
+    projectionMatrix.perspective(55.0f, aspect, 0.2f, 10.0f);
+
+    QMatrix4x4 viewMatrix;
+    viewMatrix.translate(QVector3D(0.0f, 0.0f, -1.0f));
+    viewMatrix.rotate(68.0f, QVector3D(-1.0f, 0.0f, 0.0f));
+    viewMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
+    viewMatrix.translate(-playerSnake_->getHeadPosition());
+
+    QVector3D lightDir = QVector3D(0.8f, 0.4f, 0.8f).normalized();
 
     for (QOpenGLShaderProgram* program : renderMap_.keys())
     {
         program->bind();
-        program->setUniformValue("mvpMatrix", mvpMatrix);
+        program->setUniformValue("ambient", 0.7f);
 
         for (Renderable* renderable : renderMap_[program])
+        {
+            QMatrix4x4 modelMatrix = renderable->getTransform()->getModelMatrix();
+            QMatrix4x4 mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
+            QVector3D eyeLightDir = lightDir;
+
+            program->setUniformValue("mvpMatrix", mvpMatrix);
+            program->setUniformValue("modelMatrix", modelMatrix);
+            program->setUniformValue("eyeLightDir", eyeLightDir);
+
             renderable->render(gl);
+        }
+
+        program->release();
     }
 
     // Empty buffers
@@ -107,16 +120,17 @@ void GameWindow::loadResources()
     // Create single instance for a resource manager
     resourceManager_ = new ResourceManager;
 
-    // Create a shader program for snake before it is made
+    // Load necessary resources at the beginning instead of during runtime
     resourceManager_->createProgram("snake_program",
                                     "snake_vertex.glsl",
                                     "snake_fragment.glsl");
 
-    resourceManager_->createProgram("basicShader_program",
-                                    "basicShader_vertex.glsl",
-                                    "basicShader_fragment.glsl");
+    resourceManager_->createProgram("consumable_program",
+                                    "consumable_vertex.glsl",
+                                    "consumable_fragment.glsl");
 
-    // TODO: Load additional shaders and textures here
+    resourceManager_->loadMesh("apple_mesh.obj");
+    resourceManager_->loadTexture("apple_tex_stylized.png");
 }
 
 void GameWindow::paintGL()
@@ -148,22 +162,35 @@ void GameWindow::initializeGL()
     initializeGame();
 }
 
+void GameWindow::addRandomFood()
+{
+    DensConsumable* food = new DensConsumable();
+    food->loadResources(resourceManager_);
+    food->getTransform()->setPosition(
+                QVector3D(rand()%1000 / 500.0f-1.0f, rand()%1000 / 500.0f-1.0f, 0.0f));
+
+    addGameObject(food);
+}
+
 void GameWindow::keyPressEvent(QKeyEvent* event)
 {
     if (event->isAutoRepeat()) return;
 
+    int key = event->key();
+
     // Set key as active (pressed down)
-    keyMap[event->key()] = true;
+    keyMap[key] = true;
 
-    if (event->key() == Qt::Key_A)
+    if (key == Qt::Key_A)
         playerSnake_->steer(1);
-    else if (event->key() == Qt::Key_D)
+    else if (key == Qt::Key_D)
         playerSnake_->steer(-1);
-    else if (event->key() == Qt::Key_F11)
+    else if (key == Qt::Key_F11)
         toggleFullscreen();
-    else if (event->key() == Qt::Key_Space)
+    else if (key == Qt::Key_Space)
         playerSnake_->eat();
-
+    else if (key == Qt::Key_V)
+        addRandomFood();
 }
 
 void GameWindow::keyReleaseEvent(QKeyEvent* event)

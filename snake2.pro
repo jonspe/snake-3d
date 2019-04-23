@@ -27,23 +27,27 @@ CONFIG += c++14
 SOURCES += \
     main.cpp \
     snake.cpp \
-    gameobject.cpp \
     camera.cpp \
     resourcemanager.cpp \
     renderable.cpp \
     gamewindow.cpp \
     foodconsumable.cpp \
-    consumable.cpp
+    consumable.cpp \
+    transform.cpp \
+    gameobject.cpp \
+    densconsumable.cpp
 
 HEADERS += \
     snake.hh \
     renderable.hh \
-    gameobject.hh \
     camera.hh \
     resourcemanager.hh \
     gamewindow.hh \
     consumable.hh \
-    foodconsumable.hh
+    foodconsumable.hh \
+    transform.hh \
+    gameobject.hh \
+    densconsumable.hh
 
 RESOURCES += \
     resource.qrc

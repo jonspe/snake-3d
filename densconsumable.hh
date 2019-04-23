@@ -1,14 +1,14 @@
-#ifndef FOODCONSUMABLE_HH
-#define FOODCONSUMABLE_HH
+#ifndef DENSCONSUMABLE_HH
+#define DENSCONSUMABLE_HH
 
 #include "consumable.hh"
 
 
-class FoodConsumable : public Consumable
+class DensConsumable : public Consumable
 {
 public:
-    FoodConsumable();
-    ~FoodConsumable() override;
+    DensConsumable();
+    ~DensConsumable() override;
 
     void update(float timeDelta) override;
     void render(QOpenGLFunctions *gl) override;
@@ -22,4 +22,4 @@ private:
     float floatAngle;
 };
 
-#endif // FOODCONSUMABLE_HH
+#endif // DENSCONSUMABLE_HH

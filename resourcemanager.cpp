@@ -19,7 +19,7 @@ QOpenGLTexture *ResourceManager::loadTexture(const QString &textureFileName)
         return textureMap_[textureFileName];
 
     QString path = textureDirectory_.filePath(textureFileName);
-    QOpenGLTexture* texture = new QOpenGLTexture(QImage(path));
+    QOpenGLTexture* texture = new QOpenGLTexture(QImage(path).mirrored(false, true));
 
     return texture;
 }
@@ -100,14 +100,14 @@ MeshData* parseObjFile(const QString& path) {
     if (meshFile.open(QIODevice::ReadOnly))
     {
         QRegularExpression vertexExp("v\\s(\\-?\\d+\\.\\d+)\\s(\\-?\\d+\\.\\d+)\\s(\\-?\\d+\\.\\d+)"); // 3d vertices
-        QRegularExpression uvExp("vt\\s(\\-?\\d+\\.\\d+)\\s(\\-?\\d+\\.\\d+)"); // 2d uvs
+        QRegularExpression texcoordExp("vt\\s(\\-?\\d+\\.\\d+)\\s(\\-?\\d+\\.\\d+)"); // 2d texture coordinate uvs
         QRegularExpression normalExp("vn\\s(\\-?\\d+\\.\\d+)\\s(\\-?\\d+\\.\\d+)\\s(\\-?\\d+\\.\\d+)"); // 3d normals
 
         QRegularExpression faceExp("f\\s(\\d+/\\d+/\\d+)\\s(\\d+/\\d+/\\d+)\\s(\\d+/\\d+/\\d+)"); // mesh should be triangulated
         QRegularExpression faceVertExp("(\\d+)/(\\d+)/(\\d+)"); // mesh should have UVs and normals exported
 
         QVector<QVector3D> tempVertexData;
-        QVector<QVector2D> tempUvData;
+        QVector<QVector2D> tempTexcoordData;
         QVector<QVector3D> tempNormalData;
         uint indexCounter = 0;
 
@@ -126,10 +126,10 @@ MeshData* parseObjFile(const QString& path) {
                     match.captured(3).toFloat()
                 ));
             }
-            else if (uvExp.match(line).hasMatch())
+            else if (texcoordExp.match(line).hasMatch())
             {
-                QRegularExpressionMatch match = uvExp.match(line);
-                tempUvData.append(QVector2D(
+                QRegularExpressionMatch match = texcoordExp.match(line);
+                tempTexcoordData.append(QVector2D(
                     match.captured(1).toFloat(),
                     match.captured(2).toFloat()
                 ));
@@ -156,16 +156,16 @@ MeshData* parseObjFile(const QString& path) {
                     // Triangles are formatted in .obj file like so, for example:
                     // f 4/2/3 6/2/1 9/2/4
                     int vertexIndex = vertMatch.captured(1).toInt() - 1;
-                    int uvIndex = vertMatch.captured(2).toInt() - 1;
+                    int texcoordIndex = vertMatch.captured(2).toInt() - 1;
                     int normalIndex = vertMatch.captured(3).toInt() - 1;
 
                     meshData->vertexData.append(tempVertexData.at(vertexIndex));
-                    meshData->uvData.append(tempUvData.at(uvIndex));
+                    meshData->texcoordData.append(tempTexcoordData.at(texcoordIndex));
                     meshData->normalData.append(tempNormalData.at(normalIndex));
 
                     // Temporary, uses duplicate vertices so shading is questionable
                     // TODO: Detect duplicate vertices and adjust indices accordingly
-                    meshData->indexData.append(++indexCounter);
+                    meshData->indexData.append(indexCounter++);
                 }
             }
         }

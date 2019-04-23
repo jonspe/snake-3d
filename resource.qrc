@@ -2,8 +2,11 @@
     <qresource prefix="/">
         <file>shaders/snake_fragment.glsl</file>
         <file>shaders/snake_vertex.glsl</file>
-        <file>shaders/basicShader_fragment.glsl</file>
-        <file>shaders/basicShader_vertex.glsl</file>
         <file>meshes/apple_mesh.obj</file>
+        <file>textures/apple_tex_stylized.png</file>
+        <file>shaders/consumable_fragment.glsl</file>
+        <file>shaders/consumable_vertex.glsl</file>
+        <file>meshes/dens_mesh.obj</file>
+        <file>textures/odens_tex.png</file>
     </qresource>
 </RCC>

@@ -22,10 +22,12 @@
 #include <QList>
 
 #include "resourcemanager.hh"
+#include "transform.hh"
 
 class Renderable
 {
 public:
+    Renderable();
     virtual ~Renderable() {}
 
     // Create VBO, allocate memory etc.
@@ -34,12 +36,12 @@ public:
     // Render the object on the GPU
     virtual void render(QOpenGLFunctions* gl) = 0;
 
+    Transform* getTransform();
     QOpenGLShaderProgram* getShaderProgram();
-    QMatrix4x4 getModelTransform();
 
 protected:
+    Transform* transform_;
     QOpenGLShaderProgram* shaderProgram_;
-    QMatrix4x4 modelTransform_;
 };
 
 #endif // RENDERABLE_HH
