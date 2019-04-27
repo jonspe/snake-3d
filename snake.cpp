@@ -1,7 +1,7 @@
 /**
   TIE-02201 Ohjelmointi 2: Perusteet, K2019
   Assignment 12.4: Matopelin paluu
-    3D Snake game made with OpenGL 2.1 immediate mode.
+    3D Snake game made with OpenGL ES 2.0.
     See 'instructions.txt' for further information.
 
   snake.cpp
@@ -19,7 +19,7 @@
 
 #include "snake.hh"
 #include "resourcemanager.hh"
-#include "foodconsumable.hh"
+#include "consumable.hh"
 
 
 #define PI_F 3.141592653f
@@ -33,6 +33,17 @@ namespace {
 Snake::Snake(float length, float moveSpeed , float steerSpeed): GameObject (),
     moveSpeed_(moveSpeed), steerSpeed_(steerSpeed), steerDir_(0), heading_(0), headPosition_()
 {
+    // Load premade program
+    ResourceManager& resourceManager = ResourceManager::getInstance();
+    shaderProgram_ = resourceManager.loadProgram("snake_program");
+
+    // Link shader program to OpenGL
+    shaderProgram_->link();
+
+    shaderProgram_->enableAttributeArray("aVertex");
+    shaderProgram_->enableAttributeArray("aNormal");
+    shaderProgram_->enableAttributeArray("aTail");
+
     int segments = int(length/SNAKE_SEGMENT_DIST);
     for (int i = 0; i < segments; ++i)
         tail_.push_back(transform_->getPosition() + QVector3D(0.0f, -i * SNAKE_SEGMENT_DIST, 0.0f));
@@ -40,17 +51,17 @@ Snake::Snake(float length, float moveSpeed , float steerSpeed): GameObject (),
 
 Snake::~Snake() {}
 
-void Snake::update(float timeDelta)
+void Snake::update(float deltaTime)
 {
     // Multiply by move_speed_ to ensure same turning radius across speeds
-    heading_ += steerDir_ * steerSpeed_ * moveSpeed_ * timeDelta;
+    heading_ += steerDir_ * steerSpeed_ * moveSpeed_ * deltaTime;
 
     QVector3D dir(cosf(heading_), sinf(heading_), 0);
 
     // use separate headPosition, because snake transform should be kept default zero
-    headPosition_ += dir * moveSpeed_ * timeDelta;
+    headPosition_ += dir * moveSpeed_ * deltaTime;
 
-    processDigestItems(timeDelta);
+    processDigestItems(deltaTime);
 
     // Calculate tail positions so that each is a set distance apart
     // Gives a really cool effect, like rope at 1.0 friction with ground
@@ -65,12 +76,12 @@ void Snake::update(float timeDelta)
     }
 }
 
-void Snake::processDigestItems(float timeDelta)
+void Snake::processDigestItems(float deltaTime)
 {
     for (auto it = digestItems_.begin(); it != digestItems_.end();)
     {
         DigestItem* item = *it;
-        item->position += moveSpeed_ * timeDelta;
+        item->position += moveSpeed_ * deltaTime;
 
         if (item->position >= getTailLength())
         {
@@ -85,9 +96,9 @@ void Snake::processDigestItems(float timeDelta)
     }
 }
 
-void Snake::applyEffect(Effect effect)
+void Snake::applyEffect(ConsumeEffect effect)
 {
-    setTailLength( getTailLength() + effect.lengthAdd);
+    setTailLength( getTailLength() + effect.lengthMod);
 }
 
 void Snake::steer(int dir)
@@ -95,25 +106,16 @@ void Snake::steer(int dir)
     steerDir_ = dir;
 }
 
-void Snake::loadResources(ResourceManager* resourceManager)
-{
-    // Load premade program
-    shaderProgram_ = resourceManager->loadProgram("snake_program");
-
-    // Link shader program to OpenGL
-    shaderProgram_->link();
-
-    shaderProgram_->enableAttributeArray("aVertex");
-    shaderProgram_->enableAttributeArray("aNormal");
-    shaderProgram_->enableAttributeArray("aTail");
-}
 
 void Snake::eat()
 {
-    FoodConsumable food;
+    ConsumeEffect effect;
+    effect.duration = -1.0f;
+    effect.lengthMod = 0.2f;
+
     DigestItem* digestItem = new DigestItem;
     digestItem->position = -0.10f;
-    digestItem->effect = food.getEffect();
+    digestItem->effect = effect;
 
     digestItems_.append(digestItem);
 }

@@ -1,7 +1,7 @@
 /**
   TIE-02201 Ohjelmointi 2: Perusteet, K2019
   Assignment 12.4: Matopelin paluu
-    3D Snake game made with OpenGL 2.1 immediate mode.
+    3D Snake game made with OpenGL ES 2.0.
     See 'instructions.txt' for further information.
 
   snake.hh
@@ -22,11 +22,11 @@
 #include "consumable.hh"
 #include "gameobject.hh"
 
-const int SNAKE_DEFINITION = 12;
+const int SNAKE_DEFINITION = 16;
 
 const float SNAKE_HEAD_LENGTH = 0.06f;
 const float SNAKE_TAIL_END_LENGTH = 0.06f;
-const float SNAKE_SEGMENT_DIST = 0.04f;
+const float SNAKE_SEGMENT_DIST = 0.03f;
 
 const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
 
@@ -41,7 +41,7 @@ public:
     ~Snake() override;
 
     void steer(int dir);
-    void update(float timeDelta) override;
+    void update(float deltaTime) override;
     void render(QOpenGLFunctions *gl) override;
 
     float getTailLength();
@@ -50,14 +50,12 @@ public:
     float getHeading();
     QVector3D getHeadPosition();
 
-    void applyEffect(Effect effect);
+    void applyEffect(ConsumeEffect effect);
 
     void eat();
 
-    void loadResources(ResourceManager* resourceManager) override;
-
 private:
-    void processDigestItems(float timeDelta);
+    void processDigestItems(float deltaTime);
 
     QVector3D headPosition_;
 
@@ -68,7 +66,7 @@ private:
     float heading_;
 
     struct DigestItem {
-        Effect effect;
+        ConsumeEffect effect;
         float position;
     };
 

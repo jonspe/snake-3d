@@ -1,11 +1,13 @@
 /**
   TIE-02201 Ohjelmointi 2: Perusteet, K2019
   Assignment 12.4: Matopelin paluu
-    3D Snake game made with OpenGL 2.1 immediate mode.
+    3D Snake game made with OpenGL ES 2.0.
     See 'instructions.txt' for further information.
 
-  main_window.cpp
-    Defines a class implementing a UI for the game.
+  game_window.cpp
+    Defines a class for handling window events, game logic,
+    UI rendering and 3D rendering. The base class where
+    everything important happens.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
@@ -13,8 +15,7 @@
 
 #include "gamewindow.hh"
 
-#include "foodconsumable.hh"
-#include "densconsumable.hh"
+#include "consumable.hh"
 
 GameWindow::GameWindow() {
     // Window settings
@@ -54,18 +55,27 @@ void GameWindow::addGameObject(GameObject *gameObject)
 void GameWindow::initializeGame()
 {
     playerSnake_ = new Snake(1.0f, 0.7f, 4.0f);
-    playerSnake_->loadResources(resourceManager_);
     addGameObject(playerSnake_);
 }
 
 void GameWindow::updateGame()
 {
-    qint64 ns = elapsedTimer_.nsecsElapsed();
-    float timeDelta = float(ns-prevNs_) * 1.0f/1000000000.0f;
-    prevNs_ = ns;
-
     for (GameObject* object : gameObjects_)
-        object->update(timeDelta);
+        object->update(getDeltaTime());
+
+    prevNs_ = elapsedTimer_.nsecsElapsed();
+}
+
+float GameWindow::getElapsedTime()
+{
+    qint64 ns = elapsedTimer_.nsecsElapsed();
+    return ns * 0.000000001f;
+}
+
+float GameWindow::getDeltaTime()
+{
+    qint64 ns = elapsedTimer_.nsecsElapsed();
+    return (ns-prevNs_) * 0.000000001f;
 }
 
 void GameWindow::renderGame()
@@ -85,7 +95,7 @@ void GameWindow::renderGame()
     QMatrix4x4 viewMatrix;
     viewMatrix.translate(QVector3D(0.0f, 0.0f, -1.0f));
     viewMatrix.rotate(68.0f, QVector3D(-1.0f, 0.0f, 0.0f));
-    viewMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
+    //viewMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
     viewMatrix.translate(-playerSnake_->getHeadPosition());
 
     QVector3D lightDir = QVector3D(0.8f, 0.4f, 0.8f).normalized();
@@ -94,6 +104,7 @@ void GameWindow::renderGame()
     {
         program->bind();
         program->setUniformValue("ambient", 0.7f);
+        program->setUniformValue("time", getElapsedTime());
 
         for (Renderable* renderable : renderMap_[program])
         {
@@ -118,19 +129,22 @@ void GameWindow::renderGame()
 void GameWindow::loadResources()
 {
     // Create single instance for a resource manager
-    resourceManager_ = new ResourceManager;
+    ResourceManager& resourceManager = ResourceManager::getInstance();
 
-    // Load necessary resources at the beginning instead of during runtime
-    resourceManager_->createProgram("snake_program",
+    // Load necessary resources at the beginning instead of during runtime to prevent hiccups
+    resourceManager.createProgram("snake_program",
                                     "snake_vertex.glsl",
                                     "snake_fragment.glsl");
 
-    resourceManager_->createProgram("consumable_program",
+    resourceManager.createProgram("consumable_program",
                                     "consumable_vertex.glsl",
                                     "consumable_fragment.glsl");
 
-    resourceManager_->loadMesh("apple_mesh.obj");
-    resourceManager_->loadTexture("apple_tex_stylized.png");
+    resourceManager.loadMesh("apple_mesh.obj");
+    resourceManager.loadMesh("dens_mesh.obj");
+
+    resourceManager.loadTexture("apple_tex_stylized.png");
+    resourceManager.loadTexture("odens_tex.png");
 }
 
 void GameWindow::paintGL()
@@ -164,9 +178,8 @@ void GameWindow::initializeGL()
 
 void GameWindow::addRandomFood()
 {
-    DensConsumable* food = new DensConsumable();
-    food->loadResources(resourceManager_);
-    food->getTransform()->setPosition(
+    Consumable* food = new Consumable("burger");
+    food->setPosition(
                 QVector3D(rand()%1000 / 500.0f-1.0f, rand()%1000 / 500.0f-1.0f, 0.0f));
 
     addGameObject(food);

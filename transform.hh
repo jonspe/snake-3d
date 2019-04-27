@@ -1,11 +1,12 @@
 /**
   TIE-02201 Ohjelmointi 2: Perusteet, K2019
   Assignment 12.4: Matopelin paluu
-    3D Snake game made with OpenGL 2.1 immediate mode.
+    3D Snake game made with OpenGL ES 2.0.
     See 'instructions.txt' for further information.
 
-  gameobject.hh
-    Defines a base class for game objects around the game board.
+  transform.hh
+    Class used to handle object transformations, such as
+    position, rotation and scale.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */

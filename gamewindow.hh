@@ -1,11 +1,13 @@
 /**
   TIE-02201 Ohjelmointi 2: Perusteet, K2019
   Assignment 12.4: Matopelin paluu
-    3D Snake game made with OpenGL 2.1 immediate mode.
+    3D Snake game made with OpenGL ES 2.0.
     See 'instructions.txt' for further information.
 
-  main_window.hh
-    Defines a class implementing a UI for the game.
+  game_window.hh
+    Defines a class for handling window events, game logic,
+    UI rendering and 3D rendering. The base class where
+    everything important happens.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
@@ -63,7 +65,8 @@ private:
 
     void addRandomFood();
 
-    ResourceManager* resourceManager_;
+    float getElapsedTime();
+    float getDeltaTime();
 
     // Objects
     Snake* playerSnake_;

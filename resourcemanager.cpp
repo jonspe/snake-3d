@@ -1,34 +1,66 @@
+/**
+  TIE-02201 Ohjelmointi 2: Perusteet, K2019
+  Assignment 12.4: Matopelin paluu
+    3D Snake game made with OpenGL ES 2.0.
+    See 'instructions.txt' for further information.
+
+  resourcemanager.cpp
+    Singleton class used for managing different types of resources.
+    Handles textures, shaders, meshes and JSON files.
+
+  @author Joona Perasto, 272725, joona.perasto@tuni.fi
+*/
+
 #include "resourcemanager.hh"
 
 #include <QRegularExpression>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 namespace {
     MeshData* parseObjFile(const QString& path);
+    QJsonObject parseJsonFile(const QString& path);
+}
+
+ResourceManager& ResourceManager::getInstance()
+{
+    static ResourceManager instance;
+    return instance;
 }
 
 ResourceManager::ResourceManager()
 {
-    textureDirectory_.setPath(":/textures");
-    shaderDirectory_.setPath(":/shaders");
-    meshDirectory_.setPath(":/meshes");
+    textureDirectory_.setPath(":/resources/textures");
+    shaderDirectory_.setPath(":/resources/shaders");
+    meshDirectory_.setPath(":/resources/meshes");
+
+    consumableData_ = parseJsonFile(":/resources/gamedata/consumables.json");
+}
+
+QJsonObject ResourceManager::getConsumableData()
+{
+    return consumableData_;
 }
 
 QOpenGLTexture *ResourceManager::loadTexture(const QString &textureFileName)
 {
-    if (textureMap_.constFind(textureFileName) != textureMap_.constEnd())
+    if (textureMap_.contains(textureFileName))
         return textureMap_[textureFileName];
 
     QString path = textureDirectory_.filePath(textureFileName);
     QOpenGLTexture* texture = new QOpenGLTexture(QImage(path).mirrored(false, true));
+
+    textureMap_[textureFileName] = texture;
+
+    qDebug() << "Texture" << textureFileName << "loaded.";
 
     return texture;
 }
 
 QOpenGLShader *ResourceManager::loadShader(const QString &shaderFileName)
 {
-    if (shaderMap_.contains(shaderFileName)){
+    if (shaderMap_.contains(shaderFileName))
         return shaderMap_[shaderFileName];
-    }
 
     QOpenGLShader* shader = nullptr;
     if (shaderFileName.contains("vertex"))
@@ -43,6 +75,8 @@ QOpenGLShader *ResourceManager::loadShader(const QString &shaderFileName)
     shader->compileSourceFile(path);
     shaderMap_[shaderFileName] = shader;
 
+    qDebug() << "Shader" << shaderFileName << "loaded.";
+
     return shader;
 }
 
@@ -50,6 +84,8 @@ QOpenGLShaderProgram *ResourceManager::loadProgram(const QString &programName)
 {
     if (programMap_.contains(programName))
         return programMap_[programName];
+
+    qDebug() << "Shader program" << programName << "does not exist.";
 
     return nullptr;
 }
@@ -66,6 +102,8 @@ QOpenGLShaderProgram *ResourceManager::createProgram(const QString &programName,
     program->addShader(fragmentShader);
 
     programMap_[programName] = program;
+
+    qDebug() << "Shader program" << programName << "created using" << vertexFileName << fragFileName;
 
     return program;
 }
@@ -90,6 +128,8 @@ MeshData* ResourceManager::loadMesh(const QString &meshName)
 
     return meshData;
 }
+
+
 
 namespace {
 
@@ -163,8 +203,7 @@ MeshData* parseObjFile(const QString& path) {
                     meshData->texcoordData.append(tempTexcoordData.at(texcoordIndex));
                     meshData->normalData.append(tempNormalData.at(normalIndex));
 
-                    // Temporary, uses duplicate vertices so shading is questionable
-                    // TODO: Detect duplicate vertices and adjust indices accordingly
+                    // Uses duplicate vertices so not the most efficient, but this will do
                     meshData->indexData.append(indexCounter++);
                 }
             }
@@ -173,6 +212,19 @@ MeshData* parseObjFile(const QString& path) {
     }
 
     return meshData;
+}
+
+QJsonObject parseJsonFile(const QString& path)
+{
+    QFile jsonFile(path);
+    QByteArray jsonByteArray;
+
+    jsonFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    jsonByteArray = jsonFile.readAll();
+    jsonFile.close();
+
+    QJsonDocument document = QJsonDocument::fromJson(jsonByteArray);
+    return document.object();
 }
 
 }

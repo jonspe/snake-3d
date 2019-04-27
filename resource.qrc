@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/resources">
         <file>shaders/snake_fragment.glsl</file>
         <file>shaders/snake_vertex.glsl</file>
         <file>meshes/apple_mesh.obj</file>
@@ -8,5 +8,8 @@
         <file>shaders/consumable_vertex.glsl</file>
         <file>meshes/dens_mesh.obj</file>
         <file>textures/odens_tex.png</file>
+        <file>gamedata/consumables.json</file>
+        <file>textures/burger_tex.png</file>
+        <file>meshes/burger_mesh.obj</file>
     </qresource>
 </RCC>
