@@ -41,9 +41,9 @@ void main(void)
     float thickness = calcThickness(aTail.x) * (1.0 + aTail.y*0.5);
 
     // Displace snake from center of line
-    vec4 displacement = vec4(aNormal * thickness + vec3(0.0, thickness, 0.0), 0.0f);
+    vec4 displacement = vec4(aNormal * thickness + vec3(0.0, thickness, 0.0), 0.0);
     gl_Position = mvpMatrix * (aVertex + displacement);
 
-    vEyeNormal = normalize(modelMatrix * vec4(aNormal, 0.0));
+    vEyeNormal = normalize((modelMatrix * vec4(aNormal, 0.0)).xyz);
     vTail = aTail;
 }

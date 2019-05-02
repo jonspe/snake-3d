@@ -10,5 +10,5 @@ void main(void)
    float diffuse = step(0.0, dot(eyeLightDir, vEyeNormal));
 
    vec4 color = texture2D(texture, vTexcoord);
-   gl_FragColor = (ambient + diffuse*(1-ambient))*color;
+   gl_FragColor = (ambient + diffuse*(1.0-ambient))*color;
 }

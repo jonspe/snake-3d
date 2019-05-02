@@ -39,7 +39,7 @@ void Scene::render(QOpenGLFunctions* gl)
     if (player_ != nullptr)
     {
         float speed = player_->getProperties()->getMoveSpeed();
-        camera_->setFieldOfView(55.0f + speed * 10.0f);
+        camera_->setFieldOfView(45.0f + speed * 10.0f);
     }
 
     QVector3D lightDir = QVector3D(0.7f, 0.7f, 0.7f).normalized();

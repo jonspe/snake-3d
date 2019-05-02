@@ -12,7 +12,7 @@ varying highp vec2 vTexcoord;
 
 void main(void)
 {
-    vEyeNormal = normalize(modelMatrix * vec4(aNormal, 0.0));
+    vEyeNormal = normalize((modelMatrix * vec4(aNormal, 0.0)).xyz);
     vTexcoord = aTexcoord;
 
     gl_Position = mvpMatrix * aVertex;

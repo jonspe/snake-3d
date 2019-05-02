@@ -12,7 +12,7 @@ const vec3 fadeColor = vec3(0.5, 0.3, 0.2);
 
 void main(void)
 {
-   float diffuse = step(0, dot(eyeLightDir, vEyeNormal));
+   float diffuse = step(0.0, dot(eyeLightDir, vEyeNormal));
 
    float texFade = step(0.0, 0.4*sin(vTail.x*24.0 + cos(vTail.z*2.0)*4.0) + 0.7*sin(vTail.x*48.0));
    float lengthFade = 0.5*vTail.x/tailLength;
@@ -20,5 +20,5 @@ void main(void)
    vec3 tex = mix(baseColor, texColor, texFade);
    vec4 color = vec4(mix(tex, fadeColor, lengthFade), 0.0);
 
-   gl_FragColor = (ambient + diffuse*(1-ambient)) * color;
+   gl_FragColor = (ambient + diffuse*(1.0-ambient)) * color;
 }
