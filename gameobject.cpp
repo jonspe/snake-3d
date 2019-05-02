@@ -12,9 +12,5 @@
 
 #include "gameobject.hh"
 
-GameObject::GameObject(): Renderable ()
-{
-
-}
-
+GameObject::GameObject(Scene* scene): Renderable (), scene_(scene) {}
 GameObject::~GameObject() {}

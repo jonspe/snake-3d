@@ -16,24 +16,30 @@ class Camera
 public:
     Camera();
 
-    QMatrix4x4 getScreenTransform(QMatrix4x4 modelTransform);
+    QMatrix4x4 computeMvpMatrix(QMatrix4x4 modelTransform);
 
     QVector3D getPosition();
     QVector3D getRotation();
     float getFieldOfView();
 
+    void setViewport(int width, int height);
     void setPosition(QVector3D pos);
-    void setRotation(QVector3D rot);
+    void setRotation(QQuaternion rot);
     void setFieldOfView(float fov);
 
 private:
-    QVector3D position;
-    QVector3D rotation;
+    void updateViewMatrix();
+    void updateProjectionMatrix();
 
-    float fieldOfView;
+    QVector3D position_;
+    QQuaternion rotation_;
 
-    QMatrix4x4 viewTransform;
-    QMatrix4x4 projectionTransform;
+    float fieldOfView_;
+    int screenWidth_;
+    int screenHeight_;
+
+    QMatrix4x4 viewMatrix_;
+    QMatrix4x4 projectionMatrix_;
 };
 
 #endif // CAMERA_HH

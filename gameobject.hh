@@ -14,14 +14,21 @@
 #define GAMEOBJECT_HH
 
 #include "renderable.hh"
+#include "scene.hh"
 
 class GameObject : public Renderable
 {
 public:
-    GameObject();
+    GameObject(Scene* scene);
     virtual ~GameObject();
 
     virtual void update(float deltaTime) = 0;
+
+    bool isFoodItem();
+    bool isSnake();
+
+protected:
+    Scene* scene_;
 };
 
 #endif // GAMEOBJECT_HH

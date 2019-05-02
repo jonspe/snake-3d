@@ -19,29 +19,35 @@
 #include <QVector3D>
 
 #include "gameobject.hh"
-#include "consumeeffect.hh"
+#include "foodeffect.hh"
 
+const float ANIM_TIME = 0.45f;
 
-class Consumable : public GameObject
+class FoodItem : public GameObject
 {
 public:
-    Consumable(const QString& consumableName);
-    ~Consumable() override;
+    FoodItem(Scene* scene, const QString& itemName);
+    ~FoodItem() override;
 
     void update(float deltaTime) override;
     void render(QOpenGLFunctions *gl) override;
 
+    void consume();
+    bool canBeEaten();
+
     QVector3D getPosition();
     void setPosition(QVector3D position);
 
-    ConsumeEffect getEffect();
+    FoodEffect getEffect();
 
 private:
-    void loadResources(const QString& consumableName);
-
-    ConsumeEffect effect_;
+    FoodEffect effect_;
     MeshData* mesh_;
     QOpenGLTexture* texture_;
+
+    // Shrinking effect properties
+    bool isEaten_;
+    float timeEaten_;
 
     QVector3D position_;
     float floatAngle_;

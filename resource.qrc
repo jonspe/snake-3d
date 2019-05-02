@@ -4,12 +4,15 @@
         <file>shaders/snake_vertex.glsl</file>
         <file>meshes/apple_mesh.obj</file>
         <file>textures/apple_tex_stylized.png</file>
-        <file>shaders/consumable_fragment.glsl</file>
-        <file>shaders/consumable_vertex.glsl</file>
         <file>meshes/dens_mesh.obj</file>
         <file>textures/odens_tex.png</file>
-        <file>gamedata/consumables.json</file>
         <file>textures/burger_tex.png</file>
         <file>meshes/burger_mesh.obj</file>
+        <file>textures/level_tex.png</file>
+        <file>meshes/level.obj</file>
+        <file>shaders/basic_vertex.glsl</file>
+        <file>shaders/level_fragment.glsl</file>
+        <file>gamedata/fooditems.json</file>
+        <file>shaders/food_fragment.glsl</file>
     </qresource>
 </RCC>

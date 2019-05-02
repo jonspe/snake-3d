@@ -4,8 +4,8 @@
     3D Snake game made with OpenGL ES 2.0.
     See 'instructions.txt' for further information.
 
-  consumeeffect.hh
-    Defines a struct for storing the effects of a consumable.
+  foodeffect.hh
+    Defines a struct for storing the effects of a FoodItem.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
@@ -18,17 +18,17 @@
 #include <QMap>
 
 
-struct ConsumeEffect
+struct FoodEffect
 {
-    ConsumeEffect();
-    ConsumeEffect(QJsonObject effectJson);
+    FoodEffect();
+    FoodEffect(QJsonObject effectJson);
 
     float duration;
 
     float lengthMod;
+    float thicknessMod;
     float speedMod;
     float steerMod;
-
     float rainbowMod;
 };
 

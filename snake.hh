@@ -19,24 +19,19 @@
 #include <QOpenGLFunctions>
 
 #include "renderable.hh"
-#include "consumable.hh"
+#include "fooditem.hh"
 #include "gameobject.hh"
+#include "scene.hh"
+#include "snakeproperties.hh"
 
 const int SNAKE_DEFINITION = 16;
-
-const float SNAKE_HEAD_LENGTH = 0.06f;
-const float SNAKE_TAIL_END_LENGTH = 0.06f;
 const float SNAKE_SEGMENT_DIST = 0.03f;
-
-const float SNAKE_MIN_LENGTH = SNAKE_HEAD_LENGTH + SNAKE_TAIL_END_LENGTH;
 
 
 class Snake : public GameObject
 {
 public:
-    Snake(float length = 0.6f,
-          float moveSpeed = 0.7f,
-          float steerSpeed = 4.0f);
+    Snake(Scene* scene);
 
     ~Snake() override;
 
@@ -47,28 +42,29 @@ public:
     float getTailLength();
     void setTailLength(float length);
 
+    SnakeProperties* getProperties();
+
     float getHeading();
     QVector3D getHeadPosition();
 
-    void applyEffect(ConsumeEffect effect);
-
-    void eat();
+    void eat(FoodItem* item);
+    void applyEffect(FoodEffect effect);
 
 private:
     void processDigestItems(float deltaTime);
 
     QVector3D headPosition_;
+    SnakeProperties* properties_;
 
-    float moveSpeed_;
-    float steerSpeed_;
     float steerDir_;
-
     float heading_;
 
     struct DigestItem {
-        ConsumeEffect effect;
+        FoodEffect effect;
         float position;
     };
+
+    void initializeTail();
 
     QVector<QVector3D> tail_;
     QVector<DigestItem*> digestItems_;

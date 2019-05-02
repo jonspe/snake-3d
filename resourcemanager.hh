@@ -40,7 +40,7 @@ public:
     QOpenGLShaderProgram* loadProgram(const QString& programName);
     MeshData* loadMesh(const QString& meshName);
 
-    QJsonObject getConsumableData();
+    QJsonObject getFoodData();
 
     QOpenGLShaderProgram* createProgram(const QString& programName,
                                         const QString& vertexFileName,
@@ -60,7 +60,7 @@ private:
     QDir shaderDirectory_;
     QDir meshDirectory_;
 
-    QJsonObject consumableData_;
+    QJsonObject foodData_;
 
 public:
     ResourceManager(ResourceManager const&) = delete;

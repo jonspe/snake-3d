@@ -1,0 +1,86 @@
+{
+    "null": {
+        "mesh": "apple_mesh.obj",
+        "texture": "apple_tex_stylized.png",
+
+        "shaderProgram": "food_program",
+        "vertexShader": "basic_vertex.glsl",
+        "fragmentShader": "food_fragment.glsl",
+
+        "effect": {
+            "duration": 0,
+
+            "lengthMod": 0.0,
+            "thicknessMod": 0.0,
+
+            "speedMod": 0.0,
+            "steerMod": 0.0,
+
+            "rainbowMod": 0.0
+        }
+    },
+
+	"apple": {
+		"mesh": "apple_mesh.obj",
+		"texture": "apple_tex_stylized.png",
+		
+        "shaderProgram": "food_program",
+        "vertexShader": "basic_vertex.glsl",
+        "fragmentShader": "food_fragment.glsl",
+		
+		"effect": {
+			"duration": 0,
+			
+            "lengthMod": 0.15,
+			"thicknessMod": 0.0,
+			
+            "speedMod": 0.03,
+			"steerMod": 0.0,
+			
+			"rainbowMod": 0.0
+		}
+	},
+	
+	"odens": {
+		"mesh": "dens_mesh.obj",
+		"texture": "odens_tex.png",
+		
+        "shaderProgram": "food_program",
+        "vertexShader": "basic_vertex.glsl",
+        "fragmentShader": "food_fragment.glsl",
+		
+		"effect": {
+			"duration": 5,
+			
+			"lengthMod": 0.0,
+			"thicknessMod": 0.0,
+			
+            "speedMod": 0.6,
+			"steerMod": 0.0,
+			
+			"rainbowMod": 0.0
+		}
+	},
+	
+	"burger": {
+		"mesh": "burger_mesh.obj",
+		"texture": "burger_tex.png",
+		
+        "shaderProgram": "food_program",
+        "vertexShader": "basic_vertex.glsl",
+        "fragmentShader": "food_fragment.glsl",
+		
+		"effect": {
+            "duration": 5,
+			
+			"lengthMod": 0.0,
+            "thicknessMod": 0.01,
+			
+            "speedMod": -0.1,
+			"steerMod": 0.0,
+			
+			"rainbowMod": 0.0
+		}
+	}
+}
+	

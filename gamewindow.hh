@@ -29,10 +29,8 @@
 
 #include <random>
 
-#include "renderable.hh"
-#include "snake.hh"
-#include "consumable.hh"
 #include "resourcemanager.hh"
+#include "scene.hh"
 
 
 const QSize DEFAULT_SIZE(1280, 720);
@@ -46,9 +44,6 @@ public:
     GameWindow();
     ~GameWindow() override = default;
 
-    void addRenderable(Renderable* renderable);
-    void addGameObject(GameObject* gameObject);
-
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void toggleFullscreen();
@@ -58,31 +53,16 @@ protected:
     virtual void paintGL() override;
 
 private:
-    void loadResources();
-    void initializeGame();
-    void updateGame();
-    void renderGame();
+    void initializeScene();
 
-    void addRandomFood();
-
-    float getElapsedTime();
-    float getDeltaTime();
-
-    // Objects
-    Snake* playerSnake_;
-    QVector<GameObject*> gameObjects_;
+    Scene* scene_;
+    Snake* player_;
+    Camera* camera_;
 
     // Input
     QMap<int, bool> keyMap;
 
-    // Rendering
-
-    // Datastructure for renderable objects
-    // Used to sort by shader for efficient rendering, allows for low amount of shader changing
-    using RenderMap = QMap<QOpenGLShaderProgram*, QVector<Renderable*>>;
-
     QOpenGLFunctions* gl;
-    RenderMap renderMap_;
 
     // Timers for update loop
     QElapsedTimer elapsedTimer_;

@@ -34,12 +34,12 @@ ResourceManager::ResourceManager()
     shaderDirectory_.setPath(":/resources/shaders");
     meshDirectory_.setPath(":/resources/meshes");
 
-    consumableData_ = parseJsonFile(":/resources/gamedata/consumables.json");
+    foodData_ = parseJsonFile(":/resources/gamedata/fooditems.json");
 }
 
-QJsonObject ResourceManager::getConsumableData()
+QJsonObject ResourceManager::getFoodData()
 {
-    return consumableData_;
+    return foodData_;
 }
 
 QOpenGLTexture *ResourceManager::loadTexture(const QString &textureFileName)

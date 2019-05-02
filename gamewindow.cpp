@@ -14,8 +14,9 @@
 
 
 #include "gamewindow.hh"
-
-#include "consumable.hh"
+#include "level.hh"
+#include "fooditem.hh"
+#include "snake.hh"
 
 GameWindow::GameWindow() {
     // Window settings
@@ -40,117 +41,52 @@ void GameWindow::toggleFullscreen()
         setVisibility(Visibility::FullScreen);
 }
 
-void GameWindow::addRenderable(Renderable *renderable)
+
+void GameWindow::initializeScene()
 {
-    QOpenGLShaderProgram* program = renderable->getShaderProgram();
-    renderMap_[program].append(renderable);
-}
+    scene_ = new Scene;
+    camera_ = new Camera;
+    scene_->setCamera(camera_);
 
-void GameWindow::addGameObject(GameObject *gameObject)
-{
-    gameObjects_.append(gameObject);
-    addRenderable(gameObject);
-}
+    player_ = new Snake(scene_);
+    scene_->setPlayer(player_);
 
-void GameWindow::initializeGame()
-{
-    playerSnake_ = new Snake(1.0f, 0.7f, 4.0f);
-    addGameObject(playerSnake_);
-}
+    Level* level = new Level();
 
-void GameWindow::updateGame()
-{
-    for (GameObject* object : gameObjects_)
-        object->update(getDeltaTime());
-
-    prevNs_ = elapsedTimer_.nsecsElapsed();
-}
-
-float GameWindow::getElapsedTime()
-{
-    qint64 ns = elapsedTimer_.nsecsElapsed();
-    return ns * 0.000000001f;
-}
-
-float GameWindow::getDeltaTime()
-{
-    qint64 ns = elapsedTimer_.nsecsElapsed();
-    return (ns-prevNs_) * 0.000000001f;
-}
-
-void GameWindow::renderGame()
-{
-    // Clear previous image
-    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
-
-    float rot = - (playerSnake_->getHeading()) / 3.1415f * 180.0f + 90.0f;
-
-    // Calculate camera matrix, replace with the Camera class later on
-    float aspect = float(width()) / float(height());
-
-    QMatrix4x4 projectionMatrix;
-    projectionMatrix.perspective(55.0f, aspect, 0.2f, 10.0f);
-
-    QMatrix4x4 viewMatrix;
-    viewMatrix.translate(QVector3D(0.0f, 0.0f, -1.0f));
-    viewMatrix.rotate(68.0f, QVector3D(-1.0f, 0.0f, 0.0f));
-    //viewMatrix.rotate(rot, QVector3D(0.0, 0.0f, 1.0f));
-    viewMatrix.translate(-playerSnake_->getHeadPosition());
-
-    QVector3D lightDir = QVector3D(0.8f, 0.4f, 0.8f).normalized();
-
-    for (QOpenGLShaderProgram* program : renderMap_.keys())
-    {
-        program->bind();
-        program->setUniformValue("ambient", 0.7f);
-        program->setUniformValue("time", getElapsedTime());
-
-        for (Renderable* renderable : renderMap_[program])
-        {
-            QMatrix4x4 modelMatrix = renderable->getTransform()->getModelMatrix();
-            QMatrix4x4 mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
-            QVector3D eyeLightDir = lightDir;
-
-            program->setUniformValue("mvpMatrix", mvpMatrix);
-            program->setUniformValue("modelMatrix", modelMatrix);
-            program->setUniformValue("eyeLightDir", eyeLightDir);
-
-            renderable->render(gl);
-        }
-
-        program->release();
-    }
-
-    // Empty buffers
-    gl->glFlush();
-}
-
-void GameWindow::loadResources()
-{
-    // Create single instance for a resource manager
-    ResourceManager& resourceManager = ResourceManager::getInstance();
-
-    // Load necessary resources at the beginning instead of during runtime to prevent hiccups
-    resourceManager.createProgram("snake_program",
-                                    "snake_vertex.glsl",
-                                    "snake_fragment.glsl");
-
-    resourceManager.createProgram("consumable_program",
-                                    "consumable_vertex.glsl",
-                                    "consumable_fragment.glsl");
-
-    resourceManager.loadMesh("apple_mesh.obj");
-    resourceManager.loadMesh("dens_mesh.obj");
-
-    resourceManager.loadTexture("apple_tex_stylized.png");
-    resourceManager.loadTexture("odens_tex.png");
+    scene_->addGameObject(player_);
+    scene_->setLevel(level);
 }
 
 void GameWindow::paintGL()
 {
-    updateGame();
-    renderGame();
+    qint64 ns = elapsedTimer_.nsecsElapsed();
+    float deltaTime = (ns-prevNs_) * 0.000000001f;
+    prevNs_ = ns;
+
+    scene_->update(deltaTime);
+
+    // Clear previous image
+    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
+
+    float rot = - (player_->getHeading()) / 3.1415f * 180.0f;
+
+    QQuaternion cameraRotation =
+            QQuaternion::fromEulerAngles(20.0f, 0.0f, 0.0f)
+            * QQuaternion::fromEulerAngles(0.0f, rot, 0.0f);
+
+    QVector3D cameraPosition =
+            player_->getHeadPosition()
+            + cameraRotation.inverted().rotatedVector( QVector3D(0.0f, 0.0f, 1.0f));
+
+    camera_->setViewport(width(), height());
+    camera_->setPosition(cameraPosition);
+    camera_->setRotation(cameraRotation);
+
+    scene_->render(gl);
+
+    // Empty buffers
+    gl->glFlush();
 
     // Show image and call paintGL again next frame
     update();
@@ -169,21 +105,10 @@ void GameWindow::initializeGL()
     gl->glDepthMask(GL_TRUE);
     gl->glDepthFunc(GL_LEQUAL);
 
-    // Load textures and shaders etc
-    loadResources();
-
     // Start game after OpenGL context is created and settings applied
-    initializeGame();
+    initializeScene();
 }
 
-void GameWindow::addRandomFood()
-{
-    Consumable* food = new Consumable("burger");
-    food->setPosition(
-                QVector3D(rand()%1000 / 500.0f-1.0f, rand()%1000 / 500.0f-1.0f, 0.0f));
-
-    addGameObject(food);
-}
 
 void GameWindow::keyPressEvent(QKeyEvent* event)
 {
@@ -195,15 +120,13 @@ void GameWindow::keyPressEvent(QKeyEvent* event)
     keyMap[key] = true;
 
     if (key == Qt::Key_A)
-        playerSnake_->steer(1);
+        player_->steer(1);
     else if (key == Qt::Key_D)
-        playerSnake_->steer(-1);
+        player_->steer(-1);
     else if (key == Qt::Key_F11)
         toggleFullscreen();
-    else if (key == Qt::Key_Space)
-        playerSnake_->eat();
     else if (key == Qt::Key_V)
-        addRandomFood();
+        scene_->addRandomFood();
 }
 
 void GameWindow::keyReleaseEvent(QKeyEvent* event)
@@ -215,11 +138,11 @@ void GameWindow::keyReleaseEvent(QKeyEvent* event)
     // Steer control logic on key release, so the most recent input will apply
     if (key == Qt::Key_A || key == Qt::Key_D)
     {
-        playerSnake_->steer(0);
+        player_->steer(0);
         if (key == Qt::Key_A && keyMap[Qt::Key_D])
-            playerSnake_->steer(-1);
+            player_->steer(-1);
         else if (key == Qt::Key_D && keyMap[Qt::Key_A])
-            playerSnake_->steer(1);
+            player_->steer(1);
     }
 
     // Set key as inactive (released)

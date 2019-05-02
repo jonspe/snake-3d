@@ -4,8 +4,8 @@
     3D Snake game made with OpenGL 2.1 immediate mode.
     See 'instructions.txt' for further information.
 
-  consumable.cpp
-    Defines a class for 3D consumable objects on the
+  fooditem.cpp
+    Defines a class for 3D food item objects on the
     game board. Configurations are loaded from a
     JSON file.
 
@@ -13,39 +13,56 @@
 */
 
 
-#include "consumable.hh"
+#include "fooditem.hh"
 
 #include <QJsonArray>
 
-Consumable::Consumable(const QString& consumableName): floatAngle_(0.0f)
+FoodItem::FoodItem(Scene* scene, const QString& itemName): GameObject(scene),
+    floatAngle_(0.0f), timeEaten_(0.0f), isEaten_(false)
 {
     ResourceManager& resourceManager = ResourceManager::getInstance();
-    QJsonObject consumableData = resourceManager.getConsumableData();
+    QJsonObject foodData = resourceManager.getFoodData();
 
-    QJsonObject propertiesJson = consumableData[consumableName].toObject();
+    QJsonObject propertiesJson = foodData[itemName].toObject();
+    if (propertiesJson.isEmpty())
+    {
+        qWarning() << "FoodItem" << itemName << "does not exist.";
+        propertiesJson = foodData["null"].toObject();
+    }
+
     QJsonObject effectJson = propertiesJson["effect"].toObject();
 
     shaderProgram_ = resourceManager.loadProgram(propertiesJson["shaderProgram"].toString());
     mesh_ = resourceManager.loadMesh(propertiesJson["mesh"].toString());
     texture_ = resourceManager.loadTexture(propertiesJson["texture"].toString());
 
-    effect_ = ConsumeEffect(effectJson);
+    effect_ = FoodEffect(effectJson);
 
     transform_->setScale(0.1f);
 }
 
-Consumable::~Consumable() {}
+FoodItem::~FoodItem() {}
 
 
-void Consumable::update(float deltaTime)
+void FoodItem::update(float deltaTime)
 {
     floatAngle_ += 180.0f * deltaTime;
 
-    transform_->setPosition(position_ + QVector3D(0.0f, 0.0f, 0.04f * sinf(floatAngle_ * 0.02f)));
-    transform_->setRotation(QVector3D(0.0f, 0.0f, floatAngle_));
+    transform_->setPosition(position_ + QVector3D(0.0f, 0.04f * (1 + sinf(floatAngle_ * 0.02f)), 0.0f));
+    transform_->setRotation(QVector3D(0.0f, floatAngle_, 0.0f));
+
+    if (isEaten_)
+    {
+        timeEaten_ += deltaTime;
+        float scale = 1 - timeEaten_/ANIM_TIME;
+
+        transform_->setScale(0.1f * scale);
+        if (scale <= 0.0f)
+            scene_->removeGameObject(this);
+    }
 }
 
-void Consumable::render(QOpenGLFunctions *gl)
+void FoodItem::render(QOpenGLFunctions *gl)
 {
     shaderProgram_->enableAttributeArray("aVertex");
     shaderProgram_->enableAttributeArray("aTexcoord");
@@ -64,18 +81,29 @@ void Consumable::render(QOpenGLFunctions *gl)
     texture_->release();
 }
 
-QVector3D Consumable::getPosition()
+void FoodItem::consume()
+{
+    isEaten_ = true;
+    timeEaten_ = 0.0f;
+}
+
+bool FoodItem::canBeEaten()
+{
+    return !isEaten_;
+}
+
+QVector3D FoodItem::getPosition()
 {
     return position_;
 }
 
-void Consumable::setPosition(QVector3D position)
+void FoodItem::setPosition(QVector3D position)
 {
     position_ = position;
     transform_->setPosition(position);
 }
 
-ConsumeEffect Consumable::getEffect()
+FoodEffect FoodItem::getEffect()
 {
     return effect_;
 }

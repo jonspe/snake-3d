@@ -31,10 +31,13 @@ SOURCES += \
     resourcemanager.cpp \
     renderable.cpp \
     gamewindow.cpp \
-    consumable.cpp \
     transform.cpp \
     gameobject.cpp \
-    consumeeffect.cpp
+    level.cpp \
+    scene.cpp \
+    fooditem.cpp \
+    foodeffect.cpp \
+    snakeproperties.cpp
 
 HEADERS += \
     snake.hh \
@@ -42,10 +45,13 @@ HEADERS += \
     camera.hh \
     resourcemanager.hh \
     gamewindow.hh \
-    consumable.hh \
     transform.hh \
     gameobject.hh \
-    consumeeffect.hh
+    level.hh \
+    scene.hh \
+    fooditem.hh \
+    foodeffect.hh \
+    snakeproperties.hh
 
 RESOURCES += \
     resource.qrc

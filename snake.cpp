@@ -19,7 +19,7 @@
 
 #include "snake.hh"
 #include "resourcemanager.hh"
-#include "consumable.hh"
+#include "fooditem.hh"
 
 
 #define PI_F 3.141592653f
@@ -30,9 +30,10 @@ namespace {
 }
 
 
-Snake::Snake(float length, float moveSpeed , float steerSpeed): GameObject (),
-    moveSpeed_(moveSpeed), steerSpeed_(steerSpeed), steerDir_(0), heading_(0), headPosition_()
+Snake::Snake(Scene* scene): GameObject (scene), steerDir_(0), heading_(0)
 {
+    properties_ = new SnakeProperties();
+
     // Load premade program
     ResourceManager& resourceManager = ResourceManager::getInstance();
     shaderProgram_ = resourceManager.loadProgram("snake_program");
@@ -44,22 +45,41 @@ Snake::Snake(float length, float moveSpeed , float steerSpeed): GameObject (),
     shaderProgram_->enableAttributeArray("aNormal");
     shaderProgram_->enableAttributeArray("aTail");
 
-    int segments = int(length/SNAKE_SEGMENT_DIST);
-    for (int i = 0; i < segments; ++i)
-        tail_.push_back(transform_->getPosition() + QVector3D(0.0f, -i * SNAKE_SEGMENT_DIST, 0.0f));
+    initializeTail();
 }
 
 Snake::~Snake() {}
 
 void Snake::update(float deltaTime)
 {
+    properties_->update(deltaTime);
+
+    setTailLength(properties_->getLength());
+
+    float steerSpeed = properties_->getSteerSpeed();
+    float moveSpeed = properties_->getMoveSpeed();
+
     // Multiply by move_speed_ to ensure same turning radius across speeds
-    heading_ += steerDir_ * steerSpeed_ * moveSpeed_ * deltaTime;
+    heading_ += steerDir_ * steerSpeed * deltaTime;
 
-    QVector3D dir(cosf(heading_), sinf(heading_), 0);
+    QVector3D dir(-sinf(heading_), 0.0f, -cosf(heading_));
 
-    // use separate headPosition, because snake transform should be kept default zero
-    headPosition_ += dir * moveSpeed_ * deltaTime;
+    // use headPosition in world coordinates, because snake transform should be kept default zero
+    headPosition_ += dir * moveSpeed * deltaTime;
+
+    for (FoodItem* item: scene_->getFoodItems())
+    {
+        if (!item->canBeEaten())
+            continue;
+
+        float dist = (item->getPosition() - headPosition_).length();
+
+        if (dist < 0.1f)
+        {
+            eat(item);
+            item->consume();
+        }
+    }
 
     processDigestItems(deltaTime);
 
@@ -81,7 +101,7 @@ void Snake::processDigestItems(float deltaTime)
     for (auto it = digestItems_.begin(); it != digestItems_.end();)
     {
         DigestItem* item = *it;
-        item->position += moveSpeed_ * deltaTime;
+        item->position += properties_->getMoveSpeed() * deltaTime;
 
         if (item->position >= getTailLength())
         {
@@ -96,9 +116,18 @@ void Snake::processDigestItems(float deltaTime)
     }
 }
 
-void Snake::applyEffect(ConsumeEffect effect)
+void Snake::initializeTail()
 {
-    setTailLength( getTailLength() + effect.lengthMod);
+    tail_.clear();
+
+    int segments = int(properties_->getLength()/SNAKE_SEGMENT_DIST);
+    for (int i = 0; i < segments; ++i)
+        tail_.push_back(transform_->getPosition() + QVector3D(0.0f, 0.0f, i * SNAKE_SEGMENT_DIST));
+}
+
+void Snake::applyEffect(FoodEffect effect)
+{
+    properties_->addEffect(effect);
 }
 
 void Snake::steer(int dir)
@@ -107,15 +136,11 @@ void Snake::steer(int dir)
 }
 
 
-void Snake::eat()
+void Snake::eat(FoodItem* item)
 {
-    ConsumeEffect effect;
-    effect.duration = -1.0f;
-    effect.lengthMod = 0.2f;
-
     DigestItem* digestItem = new DigestItem;
     digestItem->position = -0.10f;
-    digestItem->effect = effect;
+    digestItem->effect = item->getEffect();
 
     digestItems_.append(digestItem);
 }
@@ -151,9 +176,9 @@ void Snake::render(QOpenGLFunctions* gl)
             float cosAngle = cosf(angle);
 
             // Calculate vertex normal with cross product
-            float xNormal = -dir.y() * cosAngle;
-            float yNormal = dir.x() * cosAngle;
-            float zNormal = sinf(angle);
+            float xNormal = -dir.z() * cosAngle;
+            float yNormal = -sinf(angle);
+            float zNormal = dir.x() * cosAngle;
 
             vertexData.append(v0);
             normalData.append(QVector3D(xNormal, yNormal, zNormal));
@@ -182,7 +207,8 @@ void Snake::render(QOpenGLFunctions* gl)
     shaderProgram_->setAttributeArray("aNormal", normalData.constData());
     shaderProgram_->setAttributeArray("aTail", tailData.constData());
 
-    shaderProgram_->setUniformValue("tailLength", SNAKE_SEGMENT_DIST * tailSize);
+    shaderProgram_->setUniformValue("tailLength", properties_->getLength());
+    shaderProgram_->setUniformValue("tailThickness", properties_->getThickness());
 
     // Finally draw the snake as triangles
     gl->glDrawElements(GL_TRIANGLES, indexData.count(),
@@ -212,6 +238,11 @@ void Snake::setTailLength(float length)
     } else {
         tail_.resize(newSegments);
     }
+}
+
+SnakeProperties* Snake::getProperties()
+{
+    return properties_;
 }
 
 float Snake::getHeading()
