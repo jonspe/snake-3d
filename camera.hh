@@ -17,13 +17,6 @@
 #include <QMatrix4x4>
 
 
-namespace {
-    enum class ProjectionType {
-        PERSPECTIVE,
-        ORTHO
-    };
-}
-
 const float POS_INTERPOLATION = 15.0f;
 const float ROT_INTERPOLATION = 10.0f;
 const float FOV_INTERPOLATION = 8.0f;
