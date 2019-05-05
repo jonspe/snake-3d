@@ -4,7 +4,7 @@
     3D Snake game made with OpenGL 2.1 immediate mode.
     See 'instructions.txt' for further information.
 
-  consumable.hh
+  fooditem.hh
     Defines a class for 3D consumable objects on the
     game board. Configurations are loaded from a
     JSON file.

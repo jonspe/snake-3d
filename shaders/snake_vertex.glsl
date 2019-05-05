@@ -28,11 +28,11 @@ float calcThickness(float pos)
     else if (pos > tailLength - TAIL_END_LENGTH)
     {
         float posTail = pos - tailLength + TAIL_END_LENGTH;
-        return 0.5 * tailThickness * (1.0-smoothstep(0.0, 1.0, posTail/TAIL_END_LENGTH));
+        return 0.7 * tailThickness * (1.0-smoothstep(0.0, 1.0, posTail/TAIL_END_LENGTH));
     }
 
     float bodyLength = tailLength-TAIL_END_LENGTH-HEAD_LENGTH;
-    return tailThickness * (1.0 - 0.5 * (pos-HEAD_LENGTH)/bodyLength);
+    return tailThickness * (1.0 - 0.3 * (pos-HEAD_LENGTH)/bodyLength);
 }
 
 void main(void)

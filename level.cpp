@@ -20,7 +20,7 @@ Level::Level()
 
     shaderProgram_ = resourceManager.loadProgram("level_program");
     mesh_ = resourceManager.loadMesh("level.obj");
-    texture_ = resourceManager.loadTexture("level_tex.png");
+    texture_ = resourceManager.loadTexture("solid_color_atlas.png");
 }
 
 Level::~Level() {}
@@ -40,6 +40,4 @@ void Level::render(QOpenGLFunctions *gl)
     // Finally draw the snake as triangles
     gl->glDrawElements(GL_TRIANGLES, mesh_->indexData.count(),
                        GL_UNSIGNED_INT, mesh_->indexData.constData());
-
-    texture_->release();
 }

@@ -1,7 +1,7 @@
 {
     "null": {
         "mesh": "apple_mesh.obj",
-        "texture": "apple_tex_stylized.png",
+        "texture": "solid_color_atlas.png",
 
         "shaderProgram": "food_program",
         "vertexShader": "basic_vertex.glsl",
@@ -22,7 +22,7 @@
 
 	"apple": {
 		"mesh": "apple_mesh.obj",
-		"texture": "apple_tex_stylized.png",
+        "texture": "solid_color_atlas.png",
 		
         "shaderProgram": "food_program",
         "vertexShader": "basic_vertex.glsl",
@@ -31,10 +31,10 @@
 		"effect": {
 			"duration": 0,
 			
-            "lengthMod": 0.15,
-			"thicknessMod": 0.0,
+            "lengthMod": 0.4,
+            "thicknessMod": 0.0006,
 			
-            "speedMod": 0.03,
+            "speedMod": 0.08,
 			"steerMod": 0.0,
 			
 			"rainbowMod": 0.0
@@ -50,13 +50,13 @@
         "fragmentShader": "food_fragment.glsl",
 		
 		"effect": {
-			"duration": 5,
+            "duration": 6,
 			
 			"lengthMod": 0.0,
 			"thicknessMod": 0.0,
 			
-            "speedMod": 0.6,
-			"steerMod": 0.0,
+            "speedMod": 1.2,
+            "steerMod": 2.0,
 			
 			"rainbowMod": 0.0
 		}
@@ -64,19 +64,19 @@
 	
 	"burger": {
 		"mesh": "burger_mesh.obj",
-		"texture": "burger_tex.png",
+        "texture": "solid_color_atlas.png",
 		
         "shaderProgram": "food_program",
         "vertexShader": "basic_vertex.glsl",
         "fragmentShader": "food_fragment.glsl",
 		
 		"effect": {
-            "duration": 5,
+            "duration": 4,
 			
 			"lengthMod": 0.0,
-            "thicknessMod": 0.01,
+            "thicknessMod": 0.015,
 			
-            "speedMod": -0.1,
+            "speedMod": -0.6,
 			"steerMod": 0.0,
 			
 			"rainbowMod": 0.0

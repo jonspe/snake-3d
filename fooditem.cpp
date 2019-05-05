@@ -18,7 +18,7 @@
 #include <QJsonArray>
 
 FoodItem::FoodItem(Scene* scene, const QString& itemName): GameObject(scene),
-    floatAngle_(0.0f), timeEaten_(0.0f), isEaten_(false)
+    isEaten_(false), timeEaten_(0.0f), floatAngle_(0.0f)
 {
     ResourceManager& resourceManager = ResourceManager::getInstance();
     QJsonObject foodData = resourceManager.getFoodData();
@@ -77,8 +77,6 @@ void FoodItem::render(QOpenGLFunctions *gl)
     // Finally draw the snake as triangles
     gl->glDrawElements(GL_TRIANGLES, mesh_->indexData.count(),
                        GL_UNSIGNED_INT, mesh_->indexData.constData());
-
-    texture_->release();
 }
 
 void FoodItem::consume()

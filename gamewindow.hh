@@ -13,12 +13,13 @@
 */
 
 
-#ifndef PRG2_SNAKE2_MAINWINDOW_HH
-#define PRG2_SNAKE2_MAINWINDOW_HH
+#ifndef GAMEWINDOW_HH
+#define GAMEWINDOW_HH
 
 
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
+#include <QPainter>
 #include <QMatrix4x4>
 
 #include <QDebug>
@@ -42,7 +43,7 @@ class GameWindow : public QOpenGLWindow {
 
 public:
     GameWindow();
-    ~GameWindow() override = default;
+    ~GameWindow() override;
 
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
@@ -55,20 +56,40 @@ protected:
 private:
     void initializeScene();
 
+    void startGame();
+    void pauseGame();
+    void resumeGame();
+
+    void updateCamera(float deltaTime);
+    void updateGameState();
+    void renderScene();
+
     Scene* scene_;
     Snake* player_;
     Camera* camera_;
 
-    // Input
-    QMap<int, bool> keyMap;
+    enum GameState {
+        STARTUP,
+        PLAYING,
+        RESTART,
+        PAUSED
+    };
 
+    GameState currentState_;
+
+    // Input
+    QMap<int, bool> keyMap_;
+
+    // Rendering
     QOpenGLFunctions* gl;
 
-    // Timers for update loop
+    // Timer for update loop and game time counting
     QElapsedTimer elapsedTimer_;
+    qint64 savedTime_;
+    qint64 pausedTime_;
     qint64 prevNs_;
 
 };
 
 
-#endif  // PRG2_SNAKE2_MAINWINDOW_HH
+#endif  // GAMEWINDOW_HH

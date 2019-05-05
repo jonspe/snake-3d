@@ -13,24 +13,36 @@
 */
 
 
+#include <QTime>
+
 #include "gamewindow.hh"
 #include "level.hh"
 #include "fooditem.hh"
 #include "snake.hh"
 
-GameWindow::GameWindow() {
+GameWindow::GameWindow():
+    scene_(nullptr), player_(nullptr), camera_(nullptr),
+    currentState_(GameState::STARTUP), prevNs_(0)
+{
+
     // Window settings
     setTitle("Snakey Boi");
     resize(DEFAULT_SIZE);
     setMinimumSize(MIN_SIZE);
 
+    // Enable depth buffer in window
     QSurfaceFormat format;
     format.setDepthBufferSize(16);
     format.setSamples(4);
     setFormat(format);
+}
 
-    prevNs_ = 0;
-    elapsedTimer_.start();
+GameWindow::~GameWindow()
+{
+    delete player_;
+    delete camera_;
+    delete scene_;
+    delete gl;
 }
 
 void GameWindow::toggleFullscreen()
@@ -46,29 +58,52 @@ void GameWindow::initializeScene()
 {
     scene_ = new Scene;
     camera_ = new Camera;
+    camera_->setFieldOfView(70.0f);
+    camera_->setPosition(QVector3D(0.0f, 1.5f, 6.0f));
+    camera_->setRotation(QQuaternion::fromEulerAngles(10.0f, 0.0f, 0.0f));
+
     scene_->setCamera(camera_);
 
     player_ = new Snake(scene_);
-    scene_->setPlayer(player_);
-
-    Level* level = new Level();
 
     scene_->addGameObject(player_);
-    scene_->setLevel(level);
+    scene_->setLevel(new Level());
 }
 
-void GameWindow::paintGL()
+void GameWindow::startGame()
 {
-    qint64 ns = elapsedTimer_.nsecsElapsed();
-    float deltaTime = (ns-prevNs_) * 0.000000001f;
-    prevNs_ = ns;
+    scene_->clear();
 
-    scene_->update(deltaTime);
+    delete player_;
+    player_ = new Snake(scene_);
+    scene_->addGameObject(player_);
 
-    // Clear previous image
-    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
+    // Start the game with 20 initial food
+    for (int i = 0; i < 20; i++)
+        scene_->addRandomFood();
 
+    savedTime_ = elapsedTimer_.nsecsElapsed();
+    pausedTime_ = savedTime_;
+
+    currentState_ = GameState::PLAYING;
+}
+
+void GameWindow::pauseGame()
+{
+    pausedTime_ = elapsedTimer_.nsecsElapsed();
+    currentState_ = GameState::PAUSED;
+}
+
+void GameWindow::resumeGame()
+{
+    // Take paused time into account when calculating game time
+    savedTime_ += elapsedTimer_.nsecsElapsed() - pausedTime_;
+    currentState_ = GameState::PLAYING;
+}
+
+
+void GameWindow::updateCamera(float deltaTime)
+{
     float rot = - (player_->getHeading()) / 3.1415f * 180.0f;
 
     QQuaternion cameraRotation =
@@ -79,14 +114,86 @@ void GameWindow::paintGL()
             player_->getHeadPosition()
             + cameraRotation.inverted().rotatedVector( QVector3D(0.0f, 0.0f, 1.0f));
 
+    // Speed effect
+    if (player_ != nullptr)
+    {
+        float speed = player_->getProperties()->getMoveSpeed();
+        camera_->setFieldOfViewTarget(45.0f + speed * 10.0f);
+    }
+
     camera_->setViewport(width(), height());
-    camera_->setPosition(cameraPosition);
-    camera_->setRotation(cameraRotation);
+    camera_->setPositionTarget(cameraPosition);
+    camera_->setRotationTarget(cameraRotation);
+
+    camera_->update(deltaTime);
+}
+
+void GameWindow::updateGameState()
+{
+    //qDebug() << (elapsedTimer_.nsecsElapsed() - savedTime_)/100000000;
+
+    if (player_->isDead() && currentState_ == GameState::PLAYING)
+    {
+        int score = int(player_->getTailLength()*10);
+        int msecs = static_cast<int>((elapsedTimer_.nsecsElapsed() - savedTime_) / 1000000);
+
+        QTime time(0, 0, 0, 0);
+        time = time.addMSecs(msecs);
+
+        qInfo() << "Oh no! You died!";
+        qInfo() << "Final score: " << QString::number(score);
+        qInfo() << "Time: " << time.toString("mm:ss.zzz");
+
+        currentState_ = GameState::RESTART;
+    }
+    else if (!player_->isDead())
+    {
+        if (currentState_ != GameState::PAUSED && currentState_ != GameState::STARTUP)
+        {
+            currentState_ = GameState::PLAYING;
+        }
+    }
+
+
+}
+
+void GameWindow::renderScene()
+{
+    // Initialize depth test settings and antialiasing
+    gl->glEnable(GL_MULTISAMPLE);
+    gl->glEnable(GL_CULL_FACE);
+    gl->glEnable(GL_DEPTH_TEST);
+    gl->glDepthMask(GL_TRUE);
+    gl->glDepthFunc(GL_LEQUAL);
+
+    // Clear previous image
+    gl->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl->glClearColor(0.4f, 0.8f, 1.0f, 1.0f);
 
     scene_->render(gl);
 
     // Empty buffers
     gl->glFlush();
+
+    gl->glDisable(GL_DEPTH_TEST);
+    gl->glDisable(GL_CULL_FACE);
+}
+
+void GameWindow::paintGL()
+{
+    qint64 ns = elapsedTimer_.nsecsElapsed();
+    float deltaTime = (ns-prevNs_) * 0.000000001f;
+    prevNs_ = ns;
+
+    if (currentState_ != GameState::PAUSED && currentState_ != GameState::STARTUP)
+        scene_->update(deltaTime);
+
+    updateGameState();
+
+    if (currentState_ != GameState::STARTUP)
+        updateCamera(deltaTime);
+
+    renderScene();
 
     // Show image and call paintGL again next frame
     update();
@@ -94,16 +201,21 @@ void GameWindow::paintGL()
 
 void GameWindow::initializeGL()
 {
-    // Create instance for handling OpenGL drawing functions
-    gl = new QOpenGLFunctions;
+    // Set OpenGL context to current window
+    makeCurrent();
+
+    // Get functions from context to handle OpenGL drawing functions
+    gl = QOpenGLContext::currentContext()->functions();
     gl->initializeOpenGLFunctions();
 
-    // Initialize depth test settings and antialiasing
+    // Enable antialiasing, backface culling and depth testing
     gl->glEnable(GL_MULTISAMPLE);
     gl->glEnable(GL_CULL_FACE);
     gl->glEnable(GL_DEPTH_TEST);
     gl->glDepthMask(GL_TRUE);
     gl->glDepthFunc(GL_LEQUAL);
+
+    elapsedTimer_.start();
 
     // Start game after OpenGL context is created and settings applied
     initializeScene();
@@ -117,7 +229,7 @@ void GameWindow::keyPressEvent(QKeyEvent* event)
     int key = event->key();
 
     // Set key as active (pressed down)
-    keyMap[key] = true;
+    keyMap_[key] = true;
 
     if (key == Qt::Key_A)
         player_->steer(1);
@@ -125,8 +237,12 @@ void GameWindow::keyPressEvent(QKeyEvent* event)
         player_->steer(-1);
     else if (key == Qt::Key_F11)
         toggleFullscreen();
-    else if (key == Qt::Key_V)
-        scene_->addRandomFood();
+    else if (key == Qt::Key_Space && (currentState_ == GameState::RESTART || currentState_ == GameState::STARTUP))
+        startGame();
+    else if (key == Qt::Key_Space && currentState_ == GameState::PAUSED)
+        resumeGame();
+    else if (key == Qt::Key_Space && currentState_ == GameState::PLAYING)
+        pauseGame();
 }
 
 void GameWindow::keyReleaseEvent(QKeyEvent* event)
@@ -139,12 +255,12 @@ void GameWindow::keyReleaseEvent(QKeyEvent* event)
     if (key == Qt::Key_A || key == Qt::Key_D)
     {
         player_->steer(0);
-        if (key == Qt::Key_A && keyMap[Qt::Key_D])
+        if (key == Qt::Key_A && keyMap_[Qt::Key_D])
             player_->steer(-1);
-        else if (key == Qt::Key_D && keyMap[Qt::Key_A])
+        else if (key == Qt::Key_D && keyMap_[Qt::Key_A])
             player_->steer(1);
     }
 
     // Set key as inactive (released)
-    keyMap[event->key()] = false;
+    keyMap_[event->key()] = false;
 }

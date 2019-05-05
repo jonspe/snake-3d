@@ -5,8 +5,8 @@
     See 'instructions.txt' for further information.
 
   transform.hh
-    Class used to handle object transformations, such as
-    position, rotation and scale.
+    Defines a class used to handle object transformations,
+    such as position, rotation and scale.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
@@ -25,11 +25,15 @@ public:
     Transform();
     ~Transform();
 
-    QMatrix4x4 getModelMatrix();
+    /*!
+     * \brief getModelMatrix
+     * \return
+     */
+    QMatrix4x4 getModelMatrix() const;
 
-    QVector3D getPosition();
-    QQuaternion getRotation();
-    QVector3D getScale();
+    QVector3D getPosition() const;
+    QQuaternion getRotation() const;
+    QVector3D getScale() const;
 
     void setPosition(QVector3D position);
     void setRotation(QQuaternion rotation);

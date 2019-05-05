@@ -11,6 +11,7 @@
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
 
+
 #include "resourcemanager.hh"
 
 #include <QRegularExpression>
@@ -19,6 +20,7 @@
 
 namespace {
     MeshData* parseObjFile(const QString& path);
+    PolyData* parseObjFilePolygons(const QString& path);
     QJsonObject parseJsonFile(const QString& path);
 }
 
@@ -37,7 +39,22 @@ ResourceManager::ResourceManager()
     foodData_ = parseJsonFile(":/resources/gamedata/fooditems.json");
 }
 
-QJsonObject ResourceManager::getFoodData()
+ResourceManager::~ResourceManager()
+{
+    for (QOpenGLShader* shader : shaderMap_)
+        delete shader;
+
+    for (QOpenGLShaderProgram* program : programMap_)
+        delete program;
+
+    for (QOpenGLTexture* texture : textureMap_)
+        delete texture;
+
+    for (MeshData* mesh : meshMap_)
+        delete mesh;
+}
+
+QJsonObject ResourceManager::getFoodData() const
 {
     return foodData_;
 }
@@ -129,6 +146,26 @@ MeshData* ResourceManager::loadMesh(const QString &meshName)
     return meshData;
 }
 
+PolyData* ResourceManager::loadPolygons(const QString &meshName)
+{
+    if (polyMap_.contains(meshName))
+        return polyMap_[meshName];
+
+    QString path = meshDirectory_.filePath(meshName);
+    PolyData* polyData = parseObjFilePolygons(path);
+
+    if (polyData == nullptr)
+    {
+        qDebug() << "Error loading polygons " << meshName;
+        return nullptr;
+    }
+
+    polyMap_[meshName] = polyData;
+
+    qDebug() << "Polygons" << meshName << "loaded.";
+
+    return polyData;
+}
 
 
 namespace {
@@ -157,7 +194,7 @@ MeshData* parseObjFile(const QString& path) {
         {
             QString line = in.readLine();
 
-            if (vertexExp.match(line).hasMatch())
+            if (vertexExp.match(line).hasMatch()) // line defines a 3D vertex
             {
                 QRegularExpressionMatch match = vertexExp.match(line);
                 tempVertexData.append(QVector3D(
@@ -166,7 +203,7 @@ MeshData* parseObjFile(const QString& path) {
                     match.captured(3).toFloat()
                 ));
             }
-            else if (texcoordExp.match(line).hasMatch())
+            else if (texcoordExp.match(line).hasMatch()) // line defines texture coordinates
             {
                 QRegularExpressionMatch match = texcoordExp.match(line);
                 tempTexcoordData.append(QVector2D(
@@ -174,7 +211,7 @@ MeshData* parseObjFile(const QString& path) {
                     match.captured(2).toFloat()
                 ));
             }
-            else if (normalExp.match(line).hasMatch())
+            else if (normalExp.match(line).hasMatch()) // line defines vertex normal
             {
                 QRegularExpressionMatch match = normalExp.match(line);
                 tempNormalData.append(QVector3D(
@@ -183,7 +220,7 @@ MeshData* parseObjFile(const QString& path) {
                     match.captured(3).toFloat()
                 ));
             }
-            else if (faceExp.match(line).hasMatch())
+            else if (faceExp.match(line).hasMatch()) // line defines a triangle
             {
                 QRegularExpressionMatch match = faceExp.match(line);
 
@@ -209,10 +246,68 @@ MeshData* parseObjFile(const QString& path) {
             }
         }
         meshFile.close();
+    } else {
+        qWarning() << "Could not parse obj file at" << path;
     }
 
     return meshData;
 }
+
+
+PolyData* parseObjFilePolygons(const QString& path) {
+    QFile objFile(path);
+    PolyData* polyData = new PolyData;
+
+    if (objFile.open(QIODevice::ReadOnly))
+    {
+        QRegularExpression vertexExp("^v\\s(\\-?\\d+\\.\\d+)\\s(\\-?\\d+\\.\\d+)\\s(\\-?\\d+\\.\\d+)"); // 3d vertices
+
+        // Polygon with only vertex data format is like:
+        // f 113 136 135 134 133 132 ...
+        QRegularExpression faceExp("^f\\s"); // does line declare a face?
+        QRegularExpression faceVertExp("(\\d+)"); // mesh should have UVs and normals exported
+
+        QVector<QPointF> tempVertexData;
+
+        QTextStream in(&objFile);
+
+        while (!in.atEnd())
+        {
+            QString line = in.readLine();
+
+            if (vertexExp.match(line).hasMatch())
+            {
+                QRegularExpressionMatch match = vertexExp.match(line);
+
+                // only use x and z coordinate to form flat polygon, ignore height
+                tempVertexData.append(QPointF(
+                    match.captured(1).toDouble(),
+                    match.captured(3).toDouble()
+                ));
+            }
+            else if (faceExp.match(line).hasMatch())
+            {
+                QVector<QPointF> points;
+                QRegularExpressionMatchIterator match = faceVertExp.globalMatch(line);
+
+                // Iterate through polygon vertex indices (f 113 136 135 134 ...)
+                while (match.hasNext())
+                {
+                    int vertexIndex = match.next().captured().toInt() - 1;
+                    points.append(tempVertexData.at(vertexIndex));
+                }
+
+                polyData->append(QPolygonF(points));
+            }
+        }
+        objFile.close();
+    } else {
+        qWarning() << "Could not parse obj file at" << path;
+    }
+
+    return polyData;
+}
+
 
 QJsonObject parseJsonFile(const QString& path)
 {

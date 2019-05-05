@@ -10,6 +10,7 @@
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
 
+
 #ifndef GAMEOBJECT_HH
 #define GAMEOBJECT_HH
 
@@ -21,11 +22,7 @@ class GameObject : public Renderable
 public:
     GameObject(Scene* scene);
     virtual ~GameObject();
-
     virtual void update(float deltaTime) = 0;
-
-    bool isFoodItem();
-    bool isSnake();
 
 protected:
     Scene* scene_;

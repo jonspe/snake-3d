@@ -4,9 +4,9 @@
     3D Snake game made with OpenGL ES 2.0.
     See 'instructions.txt' for further information.
 
-  transform.cpp
-    Class used to handle object transformations, such as
-    position, rotation and scale.
+  transform.hh
+    Defines a class used to handle object transformations,
+    such as position, rotation and scale.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
@@ -16,29 +16,33 @@
 #include <math.h>
 
 
-Transform::Transform(): position_(), rotation_(), scale_() {}
+Transform::Transform():
+    position_(QVector3D(0, 0, 0)),
+    rotation_(QQuaternion()),
+    scale_(QVector3D(1, 1, 1))
+{
+    updateMatrix();
+}
 
 Transform::~Transform() {}
 
 
-QMatrix4x4 Transform::getModelMatrix()
+QMatrix4x4 Transform::getModelMatrix() const
 {
     return modelMatrix_;
 }
 
-
-
-QVector3D Transform::getPosition()
+QVector3D Transform::getPosition() const
 {
     return position_;
 }
 
-QQuaternion Transform::getRotation()
+QQuaternion Transform::getRotation() const
 {
     return rotation_;
 }
 
-QVector3D Transform::getScale()
+QVector3D Transform::getScale() const
 {
     return scale_;
 }

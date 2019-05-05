@@ -5,11 +5,12 @@
     See 'instructions.txt' for further information.
 
   resourcemanager.hh
-    Singleton class used for managing different types of resources.
+    Defines a singleton class used for managing different types of resources.
     Handles textures, shaders, meshes and JSON files.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
+
 
 #ifndef RESOURCEMANAGER_HH
 #define RESOURCEMANAGER_HH
@@ -20,6 +21,7 @@
 #include <QOpenGLBuffer>
 #include <QMap>
 #include <QDir>
+#include <QPolygonF>
 
 #include <QJsonObject>
 
@@ -30,31 +32,37 @@ struct MeshData {
     QVector<GLuint> indexData;
 };
 
+
+typedef QVector<QPolygonF> PolyData;
+
+
 class ResourceManager
 {
 public:
+    ~ResourceManager();
+
     static ResourceManager& getInstance();
 
     QOpenGLTexture* loadTexture(const QString& textureFileName);
     QOpenGLShader* loadShader(const QString& shaderFileName);
     QOpenGLShaderProgram* loadProgram(const QString& programName);
     MeshData* loadMesh(const QString& meshName);
+    PolyData* loadPolygons(const QString &meshName);
 
-    QJsonObject getFoodData();
+    QJsonObject getFoodData() const;
 
     QOpenGLShaderProgram* createProgram(const QString& programName,
                                         const QString& vertexFileName,
                                         const QString& fragFileName);
-
-    //TODO: Load json file for consumables
 
 private:
     ResourceManager();
 
     QMap<QString, QOpenGLTexture*> textureMap_;
     QMap<QString, QOpenGLShader*> shaderMap_;
-    QMap<QString, MeshData*> meshMap_;
     QMap<QString, QOpenGLShaderProgram*> programMap_;
+    QMap<QString, MeshData*> meshMap_;
+    QMap<QString, PolyData*> polyMap_;
 
     QDir textureDirectory_;
     QDir shaderDirectory_;

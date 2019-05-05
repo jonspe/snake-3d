@@ -5,7 +5,7 @@
     See 'instructions.txt' for further information.
 
   snake.hh
-    Defines a class for the snake which the user controls.
+    Defines a class for the 3D snake which the user controls.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
@@ -39,6 +39,8 @@ public:
     void update(float deltaTime) override;
     void render(QOpenGLFunctions *gl) override;
 
+    bool isDead();
+
     float getTailLength();
     void setTailLength(float length);
 
@@ -59,15 +61,12 @@ private:
     float steerDir_;
     float heading_;
 
-    struct DigestItem {
-        FoodEffect effect;
-        float position;
-    };
+    bool dead_;
 
     void initializeTail();
 
     QVector<QVector3D> tail_;
-    QVector<DigestItem*> digestItems_;
+    QVector<float> digestPositions_;
 };
 
 #endif // SNAKE_HH

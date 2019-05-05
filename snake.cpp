@@ -5,7 +5,7 @@
     See 'instructions.txt' for further information.
 
   snake.cpp
-    Defines a class for the snake which the user controls.
+    Defines a class for the 3D snake which the user controls.
 
   @author Joona Perasto, 272725, joona.perasto@tuni.fi
 */
@@ -30,7 +30,7 @@ namespace {
 }
 
 
-Snake::Snake(Scene* scene): GameObject (scene), steerDir_(0), heading_(0)
+Snake::Snake(Scene* scene): GameObject (scene), steerDir_(0), heading_(0), dead_(false)
 {
     properties_ = new SnakeProperties();
 
@@ -52,14 +52,19 @@ Snake::~Snake() {}
 
 void Snake::update(float deltaTime)
 {
-    properties_->update(deltaTime);
+    if (isDead())
+    {
+        // Meh disintegration effect
+        transform_->setPosition(transform_->getPosition() + QVector3D(0, -0.07f * deltaTime, 0));
+        return;
+    }
 
+    properties_->update(deltaTime);
     setTailLength(properties_->getLength());
 
     float steerSpeed = properties_->getSteerSpeed();
     float moveSpeed = properties_->getMoveSpeed();
 
-    // Multiply by move_speed_ to ensure same turning radius across speeds
     heading_ += steerDir_ * steerSpeed * deltaTime;
 
     QVector3D dir(-sinf(heading_), 0.0f, -cosf(heading_));
@@ -74,17 +79,36 @@ void Snake::update(float deltaTime)
 
         float dist = (item->getPosition() - headPosition_).length();
 
-        if (dist < 0.1f)
+        // If within distance, eat food and spawn a new one
+        if (dist < 0.14f)
         {
             eat(item);
             item->consume();
+            scene_->addRandomFood();
         }
+    }
+
+    // Check for collisions
+    const PolyData* colliders = scene_->getColliders();
+    for (QPolygonF collider : *colliders)
+    {
+        QPointF playerPoint( qreal(headPosition_.x()), qreal(headPosition_.z()) );
+        if (collider.containsPoint(playerPoint, Qt::FillRule::OddEvenFill))
+            dead_ = true;
+    }
+
+    // Check for tail collisions, ignore the first few segments
+    for (int i = 8; i < tail_.size(); ++i)
+    {
+        if ((headPosition_ - tail_.at(i)).lengthSquared() < 0.012f)
+            dead_ = true;
     }
 
     processDigestItems(deltaTime);
 
     // Calculate tail positions so that each is a set distance apart
     // Gives a really cool effect, like rope at 1.0 friction with ground
+    // Problem: if snake is long and goes around an object, it could intersect with it
     QVector3D prevPos = headPosition_;
     for (int i = 0; i < tail_.size(); ++i)
     {
@@ -98,17 +122,13 @@ void Snake::update(float deltaTime)
 
 void Snake::processDigestItems(float deltaTime)
 {
-    for (auto it = digestItems_.begin(); it != digestItems_.end();)
+    for (auto it = digestPositions_.begin(); it != digestPositions_.end();)
     {
-        DigestItem* item = *it;
-        item->position += properties_->getMoveSpeed() * deltaTime;
+        *it += properties_->getMoveSpeed() * deltaTime;
 
-        if (item->position >= getTailLength())
+        if (*it >= getTailLength())
         {
-            applyEffect(item->effect);
-            digestItems_.erase(it);
-            delete item;
-
+            digestPositions_.erase(it);
             continue;
         }
 
@@ -138,11 +158,8 @@ void Snake::steer(int dir)
 
 void Snake::eat(FoodItem* item)
 {
-    DigestItem* digestItem = new DigestItem;
-    digestItem->position = -0.10f;
-    digestItem->effect = item->getEffect();
-
-    digestItems_.append(digestItem);
+    applyEffect(item->getEffect());
+    digestPositions_.append(-0.1f);
 }
 
 
@@ -167,8 +184,8 @@ void Snake::render(QOpenGLFunctions* gl)
         float pos = loop * SNAKE_SEGMENT_DIST;
 
         // Calculate the sum of bumps from digestive consumable items
-        for (DigestItem* item : digestItems_)
-            bulge += bumpFunction((pos - item->position) * 8.0f);
+        for (float digestPosition : digestPositions_)
+            bulge += bumpFunction((pos - digestPosition) * 8.0f);
 
         for (int radial = 0; radial < SNAKE_DEFINITION; ++radial)
         {
@@ -213,6 +230,11 @@ void Snake::render(QOpenGLFunctions* gl)
     // Finally draw the snake as triangles
     gl->glDrawElements(GL_TRIANGLES, indexData.count(),
                        GL_UNSIGNED_INT, indexData.constData());
+}
+
+bool Snake::isDead()
+{
+    return dead_;
 }
 
 float Snake::getTailLength()

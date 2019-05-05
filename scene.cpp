@@ -1,3 +1,17 @@
+/**
+  TIE-02201 Ohjelmointi 2: Perusteet, K2019
+  Assignment 12.4: Matopelin paluu
+    3D Snake game made with OpenGL ES 2.0.
+    See 'instructions.txt' for further information.
+
+  scene.cpp
+    Defines a class representing a 3D scene that stores
+    GameObjects, a level mesh and a camera.
+
+  @author Joona Perasto, 272725, joona.perasto@tuni.fi
+*/
+
+
 #include "scene.hh"
 
 #include "renderable.hh"
@@ -6,7 +20,7 @@
 #include "level.hh"
 #include "snake.hh"
 
-Scene::Scene(): camera_(nullptr)
+Scene::Scene(): camera_(nullptr), colliders_(nullptr)
 {
     loadResources();
 }
@@ -34,13 +48,6 @@ void Scene::render(QOpenGLFunctions* gl)
 
     // Add the level to render queue
     renderMap_[level_->getShaderProgram()].append(level_);
-
-    // Speed effect
-    if (player_ != nullptr)
-    {
-        float speed = player_->getProperties()->getMoveSpeed();
-        camera_->setFieldOfView(45.0f + speed * 10.0f);
-    }
 
     QVector3D lightDir = QVector3D(0.7f, 0.7f, 0.7f).normalized();
 
@@ -76,7 +83,6 @@ void Scene::render(QOpenGLFunctions* gl)
 void Scene::addGameObject(GameObject *gameObject)
 {
     gameObjects_.append(gameObject);
-    qDebug() << gameObject;
 }
 
 void Scene::removeGameObject(GameObject *object)
@@ -97,9 +103,24 @@ void Scene::setLevel(Level *level)
     level_ = level;
 }
 
-void Scene::setPlayer(Snake *snake)
+bool Scene::isVectorInsideCollider(QVector3D vector)
 {
-    player_ = snake;
+    // Convert to 2D Point
+    QPointF vectorPoint(
+        qreal(vector.x()),
+        qreal(vector.z())
+    );
+
+    for (QPolygonF collider : *colliders_)
+        if (collider.containsPoint(vectorPoint, Qt::FillRule::OddEvenFill))
+            return true;
+
+    return false;
+}
+
+void Scene::clear()
+{
+    gameObjects_.clear();
 }
 
 const QVector<FoodItem*> Scene::getFoodItems() const
@@ -115,20 +136,38 @@ const QVector<FoodItem*> Scene::getFoodItems() const
     return items;
 }
 
+const PolyData* Scene::getColliders() const
+{
+    return colliders_;
+}
+
 void Scene::addRandomFood()
 {
     FoodItem* food = nullptr;
-    int r = rand() % 10;
-    if (r <= 4)
+    int r = rand() % 21;
+    if (r <= 16)
         food = new FoodItem(this, "apple");
-    else if (r <= 7)
+    else if (r <= 18)
         food = new FoodItem(this, "burger");
     else
         food = new FoodItem(this, "odens");
 
-    food->setPosition(
-                QVector3D(rand()%1000 / 1000.0f * 10.0f-5.0f, 0.0f, rand()%1000 / 1000.0f * 10.0f-5.0f));
+    // Make sure that the food doesn't get spawned inside a collider
+    bool insideCollider = true;
+    QVector3D foodPos;
 
+    while (insideCollider)
+    {
+        foodPos = QVector3D(
+            rand()%1000 / 1000.0f * 20.0f-10.0f,
+            0.0f,
+            rand()%1000 / 1000.0f * 20.0f-10.0f
+        );
+
+        insideCollider = isVectorInsideCollider(foodPos);
+    }
+
+    food->setPosition(foodPos);
     addGameObject(food);
 }
 
@@ -151,10 +190,12 @@ void Scene::loadResources()
                                   "level_fragment.glsl");
 
     resourceManager.loadMesh("apple_mesh.obj");
+    resourceManager.loadMesh("burger_mesh.obj");
     resourceManager.loadMesh("dens_mesh.obj");
     resourceManager.loadMesh("level.obj");
 
-    resourceManager.loadTexture("apple_tex_stylized.png");
+    resourceManager.loadTexture("solid_color_atlas.png");
     resourceManager.loadTexture("odens_tex.png");
-    resourceManager.loadTexture("level_tex.png");
+
+    colliders_ = resourceManager.loadPolygons("poly_colliders.obj");
 }

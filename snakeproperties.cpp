@@ -1,5 +1,20 @@
-#include <QDebug>
+/**
+  TIE-02201 Ohjelmointi 2: Perusteet, K2019
+  Assignment 12.4: Matopelin paluu
+    3D Snake game made with OpenGL ES 2.0.
+    See 'instructions.txt' for further information.
+
+  snakeproperties.cpp
+    Defines a class representing the properties of the
+    snake. Handles food effect stacking.
+
+  @author Joona Perasto, 272725, joona.perasto@tuni.fi
+*/
+
 #include "snakeproperties.hh"
+
+
+#include <QDebug>
 
 const float EPSILON = 0.00001f;
 
