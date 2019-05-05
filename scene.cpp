@@ -90,7 +90,11 @@ void Scene::removeGameObject(GameObject *object)
     int objIndex = gameObjects_.indexOf(object);
 
     if (objIndex != -1)
+    {
+        GameObject* obj = gameObjects_.at(objIndex);
         gameObjects_.remove(objIndex);
+        delete obj;
+    }
 }
 
 void Scene::setCamera(Camera *camera)
@@ -120,10 +124,13 @@ bool Scene::isVectorInsideCollider(QVector3D vector)
 
 void Scene::clearGameObjects()
 {
+    for (GameObject* obj : gameObjects_)
+        delete obj;
+
     gameObjects_.clear();
 }
 
-const QVector<FoodItem*> Scene::getFoodItems() const
+QVector<FoodItem*> Scene::getFoodItems() const
 {
     QVector<FoodItem*> items;
     for (GameObject* obj : gameObjects_)
@@ -136,7 +143,7 @@ const QVector<FoodItem*> Scene::getFoodItems() const
     return items;
 }
 
-const PolyData* Scene::getColliders() const
+PolyData* Scene::getColliders() const
 {
     return colliders_;
 }

@@ -79,7 +79,6 @@ void GameWindow::resetScene()
 {
     scene_->clearGameObjects();
 
-    delete player_;
     player_ = new Snake(scene_);
     scene_->addGameObject(player_);
 
@@ -188,7 +187,7 @@ void GameWindow::updateGameState()
         }
     }
 
-    // 2 seconds after dying go back to start
+    // 3 seconds after dying go back to start
     if (currentState_ == GameState::DEAD && elapsedTimer_.nsecsElapsed() - savedTime_ > 3000000000)
     {
         camera_->setInterpolationFactor(0.1f);
@@ -223,7 +222,7 @@ void GameWindow::paintGL()
 {
     qint64 ns = elapsedTimer_.nsecsElapsed();
     float deltaTime = (ns-prevNs_) * 0.000000001f;
-    deltaTime = fmin(0.04f, deltaTime); // prevent big hiccups
+    //deltaTime = fmin(0.04f, deltaTime); // prevent big hiccups
     prevNs_ = ns;
 
     if (currentState_ != GameState::PAUSED && currentState_ != GameState::START)

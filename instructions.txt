@@ -26,6 +26,10 @@ Tekstin renderöinti OpenGL pinnan päälle aiheutti vaikeuksia, joten täytyi
 tyytyä nyt printtaamaan qDebug() komennolla. Katso alhaalta kommenttia
 aiheesta.
 
+Tein koko pelin Windowsilla ja itsellä näytönohjain pyörittää peliä oikein
+smoothisti. Nyt koitin Linuxilla niin kyllähän tämä pyörii, mutta hieman
+tönkösti.
+
 
 
 Pelin säännöt
@@ -57,7 +61,7 @@ Pelin päättyminen
     - Pelissä ei voi voittaa, koska kyseessä on survival-henkinen peli.
     - Konsoliin tai Qt:n ulostuloon tulee aika ja kerätyt pisteet.
 	  (huom. minimivaatimukset alhaalla)
-	- Paina välilyöntiä kuolemisanimaation jälkeen aloittaaksesi uuden pelin.
+    - Paina välilyöntiä kuolemisanimaation jälkeen aloittaaksesi uuden pelin.
 
 
 Lisäominaisuudet

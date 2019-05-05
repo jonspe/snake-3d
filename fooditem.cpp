@@ -16,6 +16,7 @@
 #include "fooditem.hh"
 
 #include <QJsonArray>
+#include <cmath>
 
 FoodItem::FoodItem(Scene* scene, const QString& itemName): GameObject(scene),
     isEaten_(false), timeEaten_(0.0f), floatAngle_(0.0f)
@@ -85,12 +86,12 @@ void FoodItem::consume()
     timeEaten_ = 0.0f;
 }
 
-bool FoodItem::canBeEaten()
+bool FoodItem::canBeEaten() const
 {
     return !isEaten_;
 }
 
-QVector3D FoodItem::getPosition()
+QVector3D FoodItem::getPosition() const
 {
     return position_;
 }
@@ -101,7 +102,7 @@ void FoodItem::setPosition(QVector3D position)
     transform_->setPosition(position);
 }
 
-FoodEffect FoodItem::getEffect()
+FoodEffect FoodItem::getEffect() const
 {
     return effect_;
 }

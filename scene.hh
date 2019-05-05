@@ -90,13 +90,13 @@ public:
      * \brief Get all FoodItems from the scene.
      * \return foodItems
      */
-    const QVector<FoodItem*> getFoodItems() const;
+    QVector<FoodItem*> getFoodItems() const;
 
     /*!
      * \brief Get all colliders from the scene.
      * \return colliders
      */
-    const PolyData* getColliders() const;
+    PolyData* getColliders() const;
 
     /*!
      * \brief Adds a random FoodItem to the scene, the most common

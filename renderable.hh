@@ -48,13 +48,13 @@ public:
      * \brief Gets the transform of the Renderable.
      * \return transform_
      */
-    Transform* getTransform();
+    Transform* getTransform() const;
 
     /*!
      * \brief Gets the shader used by renderable.
      * \return shaderProgram_
      */
-    QOpenGLShaderProgram* getShaderProgram();
+    QOpenGLShaderProgram* getShaderProgram() const;
 
 protected:
     /*!

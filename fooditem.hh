@@ -59,19 +59,19 @@ public:
      * \brief canBeEaten
      * \return true if yes, false if no
      */
-    bool canBeEaten();
+    bool canBeEaten() const;
 
     /*!
      * \brief Gets the position of the food.
      * \return position
      */
-    QVector3D getPosition();
+    QVector3D getPosition() const;
 
     /*!
      * \brief Gets the effect of the food.
      * \return effect
      */
-    FoodEffect getEffect();
+    FoodEffect getEffect() const;
 
     /*!
      * \brief Sets the position of the food.

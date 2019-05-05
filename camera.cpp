@@ -22,17 +22,17 @@ Camera::Camera():
     updateProjectionMatrix();
 }
 
-QMatrix4x4 Camera::computeMvpMatrix(QMatrix4x4 modelMatrix)
+QMatrix4x4 Camera::computeMvpMatrix(QMatrix4x4 modelMatrix) const
 {
     return projectionMatrix_ * viewMatrix_ * modelMatrix;
 }
 
-QVector3D Camera::getPosition()
+QVector3D Camera::getPosition() const
 {
     return position_;
 }
 
-QQuaternion Camera::getRotation()
+QQuaternion Camera::getRotation() const
 {
     return rotation_;
 }
@@ -44,7 +44,7 @@ void Camera::setInterpolationFactor(float factor)
 
 void Camera::update(float timeDelta)
 {
-    float factor = timeDelta * interpolationFactor_;
+    float factor = 0.01666f * interpolationFactor_;
 
     position_ += (positionTarget_ - position_) * factor * POS_INTERPOLATION;
     rotation_ = QQuaternion::slerp(rotation_, rotationTarget_, factor * ROT_INTERPOLATION);

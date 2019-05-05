@@ -15,9 +15,8 @@
 #include "renderable.hh"
 
 
-Renderable::Renderable(): transform_(), shaderProgram_(nullptr) {
+Renderable::Renderable(): shaderProgram_(nullptr) {
     transform_ = new Transform;
-    shaderProgram_ = nullptr;
 }
 
 Renderable::~Renderable()
@@ -25,12 +24,12 @@ Renderable::~Renderable()
     delete transform_;
 }
 
-QOpenGLShaderProgram* Renderable::getShaderProgram()
+QOpenGLShaderProgram* Renderable::getShaderProgram() const
 {
     return shaderProgram_;
-};
+}
 
-Transform* Renderable::getTransform()
+Transform* Renderable::getTransform() const
 {
     return transform_;
 }

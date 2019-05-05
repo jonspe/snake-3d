@@ -51,19 +51,19 @@ public:
      * \param modelTransform
      * \return mvpMatrix
      */
-    QMatrix4x4 computeMvpMatrix(QMatrix4x4 modelTransform);
+    QMatrix4x4 computeMvpMatrix(QMatrix4x4 modelTransform) const;
 
     /*!
      * \brief Get the position of the camera.
      * \return position
      */
-    QVector3D getPosition();
+    QVector3D getPosition() const;
 
     /*!
      * \brief Get the rotation of the camera in euler angles.
      * \return rotation
      */
-    QQuaternion getRotation();
+    QQuaternion getRotation() const;
 
     /*!
      * \brief Get the field of view of the camera in degrees.
