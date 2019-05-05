@@ -42,9 +42,9 @@ void Camera::setInterpolationFactor(float factor)
     interpolationFactor_ = factor;
 }
 
-void Camera::update(float timeDelta)
+void Camera::update(float deltaTime)
 {
-    float factor = 0.01666f * interpolationFactor_;
+    float factor = deltaTime * interpolationFactor_;
 
     position_ += (positionTarget_ - position_) * factor * POS_INTERPOLATION;
     rotation_ = QQuaternion::slerp(rotation_, rotationTarget_, factor * ROT_INTERPOLATION);

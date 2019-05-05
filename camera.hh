@@ -43,7 +43,7 @@ public:
      * \brief Interpolate position, rotation and field of view.
      * \param timeDelta
      */
-    void update(float timeDelta);
+    void update(float deltaTime);
 
     /*!
      * \brief Compute the MVP matrix for 3D transformations by
