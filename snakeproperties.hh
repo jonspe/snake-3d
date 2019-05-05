@@ -22,17 +22,51 @@ const float DEFAULT_THICKNESS = 0.05f;
 const float DEFAULT_SPEED = 1.1f;
 const float DEFAULT_STEER = 3.0f;
 
-
+/*!
+ * \brief Defines a class representing the properties of the
+ * snake. Handles food effect stacking.
+ */
 class SnakeProperties {
 public:
+    /*!
+     * \brief Constructs properties with default values.
+     */
     SnakeProperties();
 
+    /*!
+     * \brief Updates effect stack and removes expired effects.
+     * \param deltaTime
+     */
     void update(float deltaTime);
+
+    /*!
+     * \brief Adds a food effect to the stack.
+     * \param effect
+     */
     void addEffect(FoodEffect effect);
 
+    /*!
+     * \brief Gets the length property.
+     * \return length
+     */
     float getLength();
+
+    /*!
+     * \brief Gets the thickness property.
+     * \return thickness
+     */
     float getThickness();
+
+    /*!
+     * \brief Gets the moveSpeed property.
+     * \return moveSpeed
+     */
     float getMoveSpeed();
+
+    /*!
+     * \brief Gets the steerSpeed property.
+     * \return steerSpeed
+     */
     float getSteerSpeed();
 
 private:
@@ -41,15 +75,29 @@ private:
     float moveSpeed_;
     float steerSpeed_;
 
+    /*!
+     * \brief Struct that contains a food effect and its expiration time.
+     */
     struct EffectStackItem
     {
         FoodEffect effect;
         float timeRemoved;
     };
 
+    /*!
+     * \brief Calculates the sum effect from all effects in the stack.
+     * \return sumEffect
+     */
     FoodEffect calculateEffectFromStack();
+
+    /*!
+     * \brief Datastructure for active food effects.
+     */
     QVector<EffectStackItem> effectStack_;
 
+    /*!
+     * \brief Time counter to keep track of effect expiration.
+     */
     float timeCounter_;
 };
 

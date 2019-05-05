@@ -24,7 +24,7 @@ käyttöliittymän Qt Designerilla." ei tullut tässä työssä oikein tehtyä,
 mutta tosiaan aihe on jo hallussa. Pyrin kuitenkin projektin minimivaatimuksiin.
 Tekstin renderöinti OpenGL pinnan päälle aiheutti vaikeuksia, joten täytyi
 tyytyä nyt printtaamaan qDebug() komennolla. Katso alhaalta kommenttia
-minimivaatimuksista.
+aiheesta.
 
 
 
@@ -57,7 +57,7 @@ Pelin päättyminen
     - Pelissä ei voi voittaa, koska kyseessä on survival-henkinen peli.
     - Konsoliin tai Qt:n ulostuloon tulee aika ja kerätyt pisteet.
 	  (huom. minimivaatimukset alhaalla)
-	- Paina välilyöntiä aloittaaksesi uuden pelin.
+	- Paina välilyöntiä kuolemisanimaation jälkeen aloittaaksesi uuden pelin.
 
 
 Lisäominaisuudet
@@ -99,7 +99,7 @@ Minimivaatimukset
 ✓ Käyttäjän pitää pystyä erottamaan toisistaan ruoka, madon pää ja madon muu ruumis.
 - Kun peli päättyy, käyttäjälle kerrotaan voitosta/häviöstä sekä käytetystä ajasta.
 	Qt:n QPainter-kirjastolla pystyy renderöimään tekstiä OpenGL-pinnan päälle,
-	mutta vastaan tulee erittäin paljon komplikaatioita. Esimerkiksi resetoi OpenGL-
+	mutta vastaan tuli erittäin paljon komplikaatioita. Se esimerkiksi resetoi OpenGL-
 	asetukset omiin mieleisiinsä default asetuksiin, aiheuttaa meshien renderöinnissä
 	korruptiota ja poistaa joitakin kokonaan näkyvistä.
 	
@@ -107,7 +107,7 @@ Minimivaatimukset
 	ja numerot erillisinä 3D-malleina Blenderissä ja käyttää niitä muodostamaan
 	teksti, mutta tähän menisi liikaa aikaa.
 	
-	Päädyin printtaamaan ajan ja pisteet konsoliin qDebug() -komennolla.
+	Päädyin siis printtaamaan ajan ja pisteet konsoliin qDebug() -komennolla.
 
 
 
@@ -133,8 +133,9 @@ Jatkokehitys
 Peliin pitäisi toteuttaa pelinsisäinen UI-systeemi, jotka renderöidään
 GLSL shadereilla. Ei mitään perus käyttöliittymäkomponentteja, koska
 ei ne sovi pelin artstyleen. Näille UI-komponenteille pitäisi sitten
-kehitellä mouse eventit ja pitäisi myös siirtyä ikkunan koordinaatistosta
-pelin 3D koordinaatistoon. UI-komponentit voisivat olla 3D, mutta
-lukittuna kameran eteen.
+kehitellä mouse eventit vaikka slottien avulla ja pitäisi myös siirtyä
+ikkunan koordinaatistosta pelin 3D koordinaatistoon. UI-komponentit
+voisivat olla 3D, mutta lukittuna kameran eteen.
 
-
+Ruokia ja efektejä voisi tehdä lisää, koska se on melko helppoa
+näillä eväillä. Kenttiäkin voisi vaihtaa kenties.

@@ -17,14 +17,33 @@
 #include "renderable.hh"
 #include "scene.hh"
 
+/*!
+ * \brief Base class for objects in the game to inherit.
+ */
 class GameObject : public Renderable
 {
 public:
+    /*!
+     * \brief Construct the GameObject
+     * \param scene
+     */
     GameObject(Scene* scene);
+
+    /*!
+     * \brief ~GameObject
+     */
     virtual ~GameObject();
+
+    /*!
+     * \brief Update function that derived classes must implement.
+     * \param deltaTime
+     */
     virtual void update(float deltaTime) = 0;
 
 protected:
+    /*!
+     * \brief Scene to store the GameObject in.
+     */
     Scene* scene_;
 };
 

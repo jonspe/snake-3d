@@ -48,7 +48,10 @@ Snake::Snake(Scene* scene): GameObject (scene), steerDir_(0), heading_(0), dead_
     initializeTail();
 }
 
-Snake::~Snake() {}
+Snake::~Snake()
+{
+    delete properties_;
+}
 
 void Snake::update(float deltaTime)
 {

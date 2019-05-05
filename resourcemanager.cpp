@@ -111,9 +111,11 @@ QOpenGLShaderProgram *ResourceManager::createProgram(const QString &programName,
                                                      const QString &vertexFileName,
                                                      const QString &fragFileName)
 {
+    // Compile shaders
     QOpenGLShader* vertexShader = loadShader(vertexFileName);
     QOpenGLShader* fragmentShader = loadShader(fragFileName);
 
+    // Create program from shaders
     QOpenGLShaderProgram* program = new QOpenGLShaderProgram;
     program->addShader(vertexShader);
     program->addShader(fragmentShader);

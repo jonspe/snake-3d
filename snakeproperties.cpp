@@ -95,6 +95,7 @@ FoodEffect SnakeProperties::calculateEffectFromStack()
 {
     FoodEffect calculatedEffect;
 
+    // Calculate modifiers by addition
     for (EffectStackItem item : effectStack_)
     {
         calculatedEffect.lengthMod += item.effect.lengthMod;

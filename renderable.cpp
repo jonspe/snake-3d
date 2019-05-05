@@ -20,6 +20,11 @@ Renderable::Renderable(): transform_(), shaderProgram_(nullptr) {
     shaderProgram_ = nullptr;
 }
 
+Renderable::~Renderable()
+{
+    delete transform_;
+}
+
 QOpenGLShaderProgram* Renderable::getShaderProgram()
 {
     return shaderProgram_;

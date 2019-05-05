@@ -11,25 +11,57 @@
 */
 
 
-#ifndef CONSUMEEFFECT_HH
-#define CONSUMEEFFECT_HH
+#ifndef FOODEFFECT_HH
+#define FOODEFFECT_HH
 
 #include <QJsonObject>
 #include <QMap>
 
 
+/*!
+ * \brief Defines a struct for storing the effects of a FoodItem.
+ */
 struct FoodEffect
 {
+    /*!
+     * \brief Constructs FoodEffect with properties set to zero.
+     */
     FoodEffect();
+
+    /*!
+     * \brief Constructs FoodEffect with properties loaded from JSON file.
+     */
     FoodEffect(QJsonObject effectJson);
 
+    /*!
+     * \brief Defines how long effect lasts.
+     */
     float duration;
 
+    /*!
+     * \brief Defines how much length is added (addition).
+     */
     float lengthMod;
+
+    /*!
+     * \brief Defines how much thickness is added (addition).
+     */
     float thicknessMod;
+
+    /*!
+     * \brief Defines how much speed is added (addition).
+     */
     float speedMod;
+
+    /*!
+     * \brief Defines how much steering speed is added (addition).
+     */
     float steerMod;
+
+    /*!
+     * \brief Inactive, doesn't do anything yet
+     */
     float rainbowMod;
 };
 
-#endif // CONSUMEEFFECT_HH
+#endif // FOODEFFECT_HH

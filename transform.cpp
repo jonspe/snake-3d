@@ -24,9 +24,6 @@ Transform::Transform():
     updateMatrix();
 }
 
-Transform::~Transform() {}
-
-
 QMatrix4x4 Transform::getModelMatrix() const
 {
     return modelMatrix_;
@@ -85,8 +82,8 @@ void Transform::updateMatrix()
 {
     modelMatrix_ = QMatrix4x4();
     modelMatrix_.translate(position_);
-    modelMatrix_.scale(scale_);
     modelMatrix_.rotate(rotation_);
+    modelMatrix_.scale(scale_);
 }
 
 

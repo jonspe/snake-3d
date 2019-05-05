@@ -38,52 +38,127 @@ const QSize DEFAULT_SIZE(1280, 720);
 const QSize MIN_SIZE(640, 480);
 
 
+/*!
+ * \brief Class representing the game window. Handles input events,
+ * game logic, 3D rendering. The base class where everything important happens.
+ */
 class GameWindow : public QOpenGLWindow {
     Q_OBJECT
 
 public:
+    /*!
+     * \brief Creates the game window and enables depth buffer.
+     */
     GameWindow();
     ~GameWindow() override;
 
+    /*!
+     * \brief Listens to key press events.
+     * \param event
+     */
     void keyPressEvent(QKeyEvent* event) override;
+
+    /*!
+     * \brief Listens to key release events.
+     * \param event
+     */
     void keyReleaseEvent(QKeyEvent* event) override;
+
+    /*!
+     * \brief Toggles between fullscreen and windowed mode.
+     */
     void toggleFullscreen();
 
 protected:
+    /*!
+     * \brief Loads OpenGL resources
+     */
     virtual void initializeGL() override;
+
+    /*!
+     * \brief Updates and renders every frame
+     */
     virtual void paintGL() override;
 
 private:
+    /*!
+     * \brief Initializes the scene by creating a new instance of Scene, adding
+     * a camera and also adds snake and fooditems.
+     */
     void initializeScene();
 
+    /*!
+     * \brief Resets game by clearing all gameobjects and inserting
+     * a new snake and fooditems.
+     */
+    void resetScene();
+
+    /*!
+     * \brief Starts the game. Should be used in conjunction with resetScene().
+     */
     void startGame();
+
+    /*!
+     * \brief Pauses the game.
+     */
     void pauseGame();
+
+    /*!
+     * \brief Resumes the game.
+     */
     void resumeGame();
 
+    /*!
+     * \brief Handles camera positioning and rotation.
+     * \param deltaTime
+     */
     void updateCamera(float deltaTime);
+
+    /*!
+     * \brief Handles game state logic.
+     */
     void updateGameState();
+
+    /*!
+     * \brief Renders the scene with OpenGL ES 2.0.
+     */
     void renderScene();
 
     Scene* scene_;
     Snake* player_;
     Camera* camera_;
+    Level* level_;
 
+    /*!
+     * \brief Enum describing the state of the game.
+     */
     enum GameState {
-        STARTUP,
+        START,
         PLAYING,
-        RESTART,
+        DEAD,
         PAUSED
     };
 
     GameState currentState_;
 
-    // Input
+    /*!
+     * \brief Datastructure for checking keys currently held down.
+     */
     QMap<int, bool> keyMap_;
 
-    // Rendering
+    /*!
+     * \brief Contains all OpenGL ES 2.0 drawing functions.
+     */
     QOpenGLFunctions* gl;
 
-    // Timer for update loop and game time counting
+    /*!
+     * \brief The angle at which the camera is when GameState is START.
+     */
+    float startupRotation_;
+
+    /*!
+     * \brief Timer used for calculating deltaTime and game time.
+     */
     QElapsedTimer elapsedTimer_;
     qint64 savedTime_;
     qint64 pausedTime_;

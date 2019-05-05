@@ -32,22 +32,22 @@ FoodItem::FoodItem(Scene* scene, const QString& itemName): GameObject(scene),
 
     QJsonObject effectJson = propertiesJson["effect"].toObject();
 
+    // Apply JSON data to the item
     shaderProgram_ = resourceManager.loadProgram(propertiesJson["shaderProgram"].toString());
     mesh_ = resourceManager.loadMesh(propertiesJson["mesh"].toString());
     texture_ = resourceManager.loadTexture(propertiesJson["texture"].toString());
 
     effect_ = FoodEffect(effectJson);
 
-    transform_->setScale(0.1f);
+    transform_->setScale(FOOD_SCALE);
 }
-
-FoodItem::~FoodItem() {}
 
 
 void FoodItem::update(float deltaTime)
 {
     floatAngle_ += 180.0f * deltaTime;
 
+    // Float the food item
     transform_->setPosition(position_ + QVector3D(0.0f, 0.04f * (1 + sinf(floatAngle_ * 0.02f)), 0.0f));
     transform_->setRotation(QVector3D(0.0f, floatAngle_, 0.0f));
 
@@ -74,7 +74,7 @@ void FoodItem::render(QOpenGLFunctions *gl)
 
     texture_->bind();
 
-    // Finally draw the snake as triangles
+    // Draw the food mesh as triangles
     gl->glDrawElements(GL_TRIANGLES, mesh_->indexData.count(),
                        GL_UNSIGNED_INT, mesh_->indexData.constData());
 }

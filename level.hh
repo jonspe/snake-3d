@@ -16,13 +16,22 @@
 
 #include <renderable.hh>
 
-
+/*!
+ * \brief Class used to render the level mesh.
+ */
 class Level : public Renderable
 {
 public:
+    /*!
+     * \brief Loads necessary resources for mesh rendering.
+     */
     Level();
     ~Level() override;
 
+    /*!
+     * \brief Renders the level mesh.
+     * \param gl
+     */
     void render(QOpenGLFunctions *gl) override;
 
 private:

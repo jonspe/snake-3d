@@ -27,17 +27,20 @@ Level::~Level() {}
 
 void Level::render(QOpenGLFunctions *gl)
 {
+    // Enable vertex attributes
     shaderProgram_->enableAttributeArray("aVertex");
     shaderProgram_->enableAttributeArray("aTexcoord");
     shaderProgram_->enableAttributeArray("aNormal");
 
+    // Send data to vertex attributes
     shaderProgram_->setAttributeArray("aVertex", mesh_->vertexData.constData());
     shaderProgram_->setAttributeArray("aTexcoord", mesh_->texcoordData.constData());
     shaderProgram_->setAttributeArray("aNormal", mesh_->normalData.constData());
 
+    // Bind texture for use in OpenGL
     texture_->bind();
 
-    // Finally draw the snake as triangles
+    // Draw the level as triangles.
     gl->glDrawElements(GL_TRIANGLES, mesh_->indexData.count(),
                        GL_UNSIGNED_INT, mesh_->indexData.constData());
 }

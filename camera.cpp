@@ -15,7 +15,7 @@
 #include "camera.hh"
 
 Camera::Camera():
-    fieldOfView_(60.0f), fieldOfViewTarget_(60.0f),
+    fieldOfView_(60.0f), fieldOfViewTarget_(60.0f), interpolationFactor_(1.0f),
     screenWidth_(800), screenHeight_(600)
 {
     updateViewMatrix();
@@ -27,11 +27,28 @@ QMatrix4x4 Camera::computeMvpMatrix(QMatrix4x4 modelMatrix)
     return projectionMatrix_ * viewMatrix_ * modelMatrix;
 }
 
+QVector3D Camera::getPosition()
+{
+    return position_;
+}
+
+QQuaternion Camera::getRotation()
+{
+    return rotation_;
+}
+
+void Camera::setInterpolationFactor(float factor)
+{
+    interpolationFactor_ = factor;
+}
+
 void Camera::update(float timeDelta)
 {
-    position_ += (positionTarget_ - position_) * timeDelta * POS_INTERPOLATION;
-    rotation_ = QQuaternion::slerp(rotation_, rotationTarget_, timeDelta * ROT_INTERPOLATION);
-    fieldOfView_ += (fieldOfViewTarget_ - fieldOfView_) * timeDelta * FOV_INTERPOLATION;
+    float factor = timeDelta * interpolationFactor_;
+
+    position_ += (positionTarget_ - position_) * factor * POS_INTERPOLATION;
+    rotation_ = QQuaternion::slerp(rotation_, rotationTarget_, factor * ROT_INTERPOLATION);
+    fieldOfView_ += (fieldOfViewTarget_ - fieldOfView_) * factor * FOV_INTERPOLATION;
 
     updateProjectionMatrix();
 }

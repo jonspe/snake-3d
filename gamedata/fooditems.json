@@ -34,7 +34,7 @@
             "lengthMod": 0.4,
             "thicknessMod": 0.0006,
 			
-            "speedMod": 0.08,
+            "speedMod": 0.06,
 			"steerMod": 0.0,
 			
 			"rainbowMod": 0.0
@@ -55,7 +55,7 @@
 			"lengthMod": 0.0,
 			"thicknessMod": 0.0,
 			
-            "speedMod": 1.2,
+            "speedMod": 1.0,
             "steerMod": 2.0,
 			
 			"rainbowMod": 0.0
@@ -71,13 +71,13 @@
         "fragmentShader": "food_fragment.glsl",
 		
 		"effect": {
-            "duration": 4,
+            "duration": 6,
 			
 			"lengthMod": 0.0,
             "thicknessMod": 0.015,
 			
-            "speedMod": -0.6,
-			"steerMod": 0.0,
+            "speedMod": -0.7,
+            "steerMod": 0.5,
 			
 			"rainbowMod": 0.0
 		}

@@ -118,7 +118,7 @@ bool Scene::isVectorInsideCollider(QVector3D vector)
     return false;
 }
 
-void Scene::clear()
+void Scene::clearGameObjects()
 {
     gameObjects_.clear();
 }
