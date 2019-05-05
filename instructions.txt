@@ -1,0 +1,140 @@
+TIE-02201 Ohjelmointi 2: Perusteet, K2019
+Assignment 12.4: Matopelin paluu
+
+3D Snake game made with OpenGL ES 2.0.
+
+Joona Perasto, 272725
+joona.perasto@tuni.fi
+
+
+
+Kommentti arvostelijalle
+---------------------------
+Halusin tehdä matopelistä kolmiulotteisen ja siksipä siitä syntyi niin
+iso projekti. Käyttöliittymien teko Qt Designerissa vaikutti jo
+onnistuvan hyvin ja signal/slot mekanismi tuli tutuksi, niin halusin
+tehdä jotain uutta ja visuaalisesti näyttävää. Projekti lähti hieman
+käsistä kun koodirivienkin määrä lähenee kahta tuhatta.
+
+Nimesin main_window.cpp ja main_window.hh uudelleen: gamewindow.cpp, gamewindow.hh.
+Se ei myöskään periydy normaalista QWindowista, vaan QOpenGLWindowista.
+
+Ymmärrän, että tavoitetta "Opin suunnittelemaan ja toteuttamaan graafisen
+käyttöliittymän Qt Designerilla." ei tullut tässä työssä oikein tehtyä,
+mutta tosiaan aihe on jo hallussa. Pyrin kuitenkin projektin minimivaatimuksiin.
+Tekstin renderöinti OpenGL pinnan päälle aiheutti vaikeuksia, joten täytyi
+tyytyä nyt printtaamaan qDebug() komennolla. Katso alhaalta kommenttia
+minimivaatimuksista.
+
+
+
+Pelin säännöt
+--------------
+Pelin aloittaminen
+    Pelin käynnistyessä aloita peli painamalla välilyöntiä.
+    
+Pelin pelaaminen
+    Kontrollit
+        Madon ohjaus
+            A: Käänny vasemmalle
+            D: Käänny oikealle
+        Muut
+            F11: Fullscreen
+            Space: Start game, Pause game, Restart game
+    Ruoka
+        Pelialueelle ilmestyy erilaisia ruokia, esim. omenoita, denssikiekkoja ja
+        burgereita.
+            Omena lisää hieman vauhtia ja pidentää matoa. Vain omenoista saa pisteitä.
+            Denssikiekko lisää nopeutta ja kääntymistä muutaman sekunnin ajaksi.
+            Burgeri hidastaa matoa ja tekee siitä hieman kookkaamman muutaman sekunnin ajaksi.
+    Tavoite
+        Pelin tavoitteena on saada aikaan mahdollisimman pitkä mato, jonka pituuden
+        mukaan määräytyy pelin lopulliset pisteet.
+        
+Pelin päättyminen
+    - Mato kuolee, kun se osuu johonkin esteeseen (esim. puunkantoon, seinään, kiveen).
+    - Mato kuolee myös jos se osuu omaan häntäänsä.
+    - Pelissä ei voi voittaa, koska kyseessä on survival-henkinen peli.
+    - Konsoliin tai Qt:n ulostuloon tulee aika ja kerätyt pisteet.
+	  (huom. minimivaatimukset alhaalla)
+	- Paina välilyöntiä aloittaaksesi uuden pelin.
+
+
+Lisäominaisuudet
+----------------------
+Lisäominaisuudet, jotka mainittu tehtävänannossa:
+
+    - Mato ei liiku aina samalla nopeudella, vaan liikkuminen
+      nopeutuu pelin edetessä. (5 p.)
+		Syömällä ruokia madon nopeus muuttuu.
+		
+    - Mato ei koostu vain suorakaiteista, vaan se muistuttaa enemmän
+      oikeaa matoa (tai käärmettä). Huomaa, että tällöin tarvitaan myös
+      erilaisia ”kulmapaloja”. (15 p.)
+		Ei kulmapaloja mutta muuten dynaaminen muoto.
+		
+	- Madon väri vaihtelee esimerkiksi liukuvasti niin, että pää on
+	  sävyltään tummin ja ruumiin eri osissa väri on sitä vaaleampi,
+	  mitä lähempänä häntää ollaan. (10 p.)
+		Madon väri tummenee ruskeaa kohti lähempänä häntää.
+		
+	- Reunojen lisäksi pelialueella on muitakin esteitä. (10 p.)
+		Kentällä on esim. puita, puunkantoja ja kiviä, joihin osuessa kuolee.
+	
+Ei mainittu tehtävänannossa:
+	
+	- Toteutettu 3D -renderöinnillä käyttämällä Qt:n OpenGL ES 2.0 kirjastoa.
+	- Madon syödessä ruoan tulee nätti efekti, kun ruoka kulkee madon vatsan läpi.
+	- Häntä liikkuu dynaamisesti, jollain tavalla fysiikan lakien mukaan, ikään
+	  kuin köyttä vetäisi pinnalla, jonka kitkakerroin on 1.
+	- Mato liikkuu kaikkiin suuntiin tason pinnalla, eikä vain neljään suuntaan.
+
+
+
+Minimivaatimukset
+-----------------------
+✓ Pelaajan pitää pystyä käynnistämään peli.
+✓ Pelissä on pelialue, jossa mato voi liikkua.
+✓ Pelaajan pitää pystyä muuttamaan madon liikkumissuuntaa.
+✓ Käyttäjän pitää pystyä erottamaan toisistaan ruoka, madon pää ja madon muu ruumis.
+- Kun peli päättyy, käyttäjälle kerrotaan voitosta/häviöstä sekä käytetystä ajasta.
+	Qt:n QPainter-kirjastolla pystyy renderöimään tekstiä OpenGL-pinnan päälle,
+	mutta vastaan tulee erittäin paljon komplikaatioita. Esimerkiksi resetoi OpenGL-
+	asetukset omiin mieleisiinsä default asetuksiin, aiheuttaa meshien renderöinnissä
+	korruptiota ja poistaa joitakin kokonaan näkyvistä.
+	
+	Yhtenä siistinä ja eleganttina vaihtoehtona olisi kirjoittaa kaikki kirjaimet
+	ja numerot erillisinä 3D-malleina Blenderissä ja käyttää niitä muodostamaan
+	teksti, mutta tähän menisi liikaa aikaa.
+	
+	Päädyin printtaamaan ajan ja pisteet konsoliin qDebug() -komennolla.
+
+
+
+Muutamia kivoja juttuja
+-------------------------
+Projektin tiedostoissa on gamedata-kansiossa JSON-tiedosto nimeltä
+'fooditems.json', johon voi helposti lisätä uudenlaisia ruokia,
+kunhan vain laittaa tekstuurien ja meshien nimet kohdilleen.
+Samalla voi säätää myös niiden aiheuttamia efektejä. Ominaisuus
+"rainbowMod" ei tee vielä mitään.
+
+Mallinsin kaiken Blenderissä paitsi käärmeen, joka luodaan runtimessa
+dynaamisesti. Tein Blenderissä myös erilliset collider-objektit, jotka
+ResourceManager lukee polygoneina ja käärme tulkitsee niitä esteinä
+joihin kuolee. ResourceManageriin koodasin näitä varten .obj parseri
+funktiot, jotka olettavat että ladatut obj-tiedostot olevat oikeassa
+muodossa, eli oikeat export-asetukset Blenderistä valittu.
+
+
+
+Jatkokehitys
+----------------
+Peliin pitäisi toteuttaa pelinsisäinen UI-systeemi, jotka renderöidään
+GLSL shadereilla. Ei mitään perus käyttöliittymäkomponentteja, koska
+ei ne sovi pelin artstyleen. Näille UI-komponenteille pitäisi sitten
+kehitellä mouse eventit ja pitäisi myös siirtyä ikkunan koordinaatistosta
+pelin 3D koordinaatistoon. UI-komponentit voisivat olla 3D, mutta
+lukittuna kameran eteen.
+
+
